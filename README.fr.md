@@ -16,6 +16,8 @@ Une session de sim racing en VR, c'est souvent quatre ou cinq logiciels à ouvri
 - **Déjà lancé ? On passe.** Un logiciel ou un jeu déjà ouvert n'est pas relancé.
 - **Feux de départ** : cinq feux suivent la séquence et passent au vert quand le jeu est lancé.
 - **Fermeture automatique (option)** : quand le jeu se termine, ferme les logiciels que tu as cochés (par exemple Crew Chief).
+- **Tes propres images de jeux** : choisis une image .jpg, .png ou .webp dans Réglages, elle devient le fond de la carte du jeu.
+- **Mises à jour intégrées** : SimLauncher vérifie les nouvelles versions sur GitHub et se met à jour en un clic, ou tout seul si tu l'autorises (jamais pendant une session). Le fichier téléchargé est vérifié avec l'empreinte SHA-256 de la release.
 - **Prêt pour le Stream Deck** : chaque jeu a sa commande à coller dans une touche *Système › Ouvrir*. Des icônes de touches sont fournies dans `assets/streamdeck`.
 - **Icône près de l'horloge** : démarrage avec Windows en icône. Clic droit pour lancer un jeu, double-clic pour ouvrir l'interface.
 - **Serveur MCP** : un assistant IA (Claude Desktop et autres) peut lister et lancer tes jeux.

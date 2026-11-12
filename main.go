@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const version = "1.1.0"
+const version = "1.2.0"
 
 func main() {
 	gameID := flag.String("game", "", "lance le jeu indiqué (ex. ams2) sans interface — pour le Stream Deck")
@@ -17,6 +17,7 @@ func main() {
 	noWait := flag.Bool("nowait", false, "ne surveille pas la fermeture du jeu")
 	mcp := flag.Bool("mcp", false, "serveur MCP sur stdio (pour Claude Desktop et autres assistants IA)")
 	tray := flag.Bool("tray", false, "démarre en icône de notification, sans fenêtre (démarrage avec Windows)")
+	flag.BoolVar(&justUpdated, "updated", false, "usage interne : relancé après une mise à jour")
 	flag.Parse()
 
 	setupLog()
@@ -70,6 +71,7 @@ func main() {
 			maybeWatch(c, g.ID)
 		}
 	default:
+		cleanupOldExe()
 		if err := runUI(c, *tray); err != nil {
 			messageBox("SimLauncher", err.Error())
 			os.Exit(1)

@@ -1,3 +1,3 @@
 module github.com/SQALG007/simlauncher
 
-go 1.22
+go 1.23

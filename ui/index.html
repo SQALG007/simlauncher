@@ -25,6 +25,13 @@ nav{display:flex;gap:4px}
 nav button{background:none;border:0;padding:8px 14px;border-radius:6px;color:var(--mute);cursor:pointer;font-family:var(--cond);font-size:17px}
 nav button[aria-selected=true]{color:var(--chalk);background:var(--tarmac)}
 header .spacer{flex:1}
+.ver{font-family:var(--sans,inherit);font-stretch:normal;font-weight:500;font-size:13px;color:var(--mute);letter-spacing:0;align-self:flex-end;margin-bottom:4px}
+.upd{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 28px;background:#1d3b2a;border-bottom:1px solid #2e6b46;font-size:14px}
+.upd[hidden]{display:none}
+.upd b{font-weight:700}
+.upd .act{background:var(--go);color:#fff;border:0;border-radius:4px;padding:6px 14px;font-weight:700;cursor:pointer}
+.upd .act[disabled]{opacity:.6;cursor:wait}
+.upd a{color:#bfe9cf}
 .quit{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;color:var(--mute);cursor:pointer}
 
 main{padding:24px 28px 40px;max-width:1240px;margin:0 auto}
@@ -33,7 +40,7 @@ main{padding:24px 28px 40px;max-width:1240px;margin:0 auto}
 /* ---- Jeux ---- */
 .paddock{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
 .plates{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-.plate{position:relative;text-align:left;background:var(--chalk);color:#1d1e21;border:0;border-radius:4px;padding:16px 16px 14px 22px;cursor:pointer;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.plate{position:relative;text-align:left;background:var(--chalk);color:#1d1e21;border:0;border-radius:4px;padding:16px 16px 14px 22px;cursor:pointer;min-height:140px;display:flex;flex-direction:column;justify-content:space-between}
 .plate::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;border-radius:4px 0 0 4px;background:var(--c,#888)}
 .plate h3{margin:0;font-family:var(--cond);font-stretch:condensed;font-weight:700;font-size:25px;line-height:1.05}
 .plate .meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#55585e}
@@ -41,6 +48,16 @@ main{padding:24px 28px 40px;max-width:1240px;margin:0 auto}
 .plate:hover .go,.plate:focus-visible .go{color:var(--kerb)}
 .plate[disabled]{opacity:.45;cursor:not-allowed}
 .plate.live{outline:3px solid var(--go)}
+.plate.pic{background:#111 var(--img) center/cover no-repeat;color:#fff}
+.plate.pic::after{content:"";position:absolute;inset:0;border-radius:4px;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.75) 100%);pointer-events:none}
+.plate.pic>*{position:relative;z-index:1}
+.plate.pic h3{text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.plate.pic .meta,.plate.pic .go{color:#fff}
+.plate.pic .go{background:rgba(0,0,0,.55);padding:3px 10px;border-radius:3px}
+.plate.pic:hover .go,.plate.pic:focus-visible .go{color:#fff;text-decoration:underline;text-underline-offset:3px;background:rgba(0,0,0,.8)}
+.plate.noname h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.plate.noname{justify-content:flex-end}
+.thumb{width:72px;height:40px;border-radius:3px;object-fit:cover;background:#222;flex:none}
 .plate .tag{font-size:12px;background:var(--go);color:#fff;border-radius:3px;padding:1px 6px}
 
 .wall{background:var(--tarmac);border-radius:6px;padding:20px}
@@ -69,7 +86,7 @@ details summary{cursor:pointer;color:var(--mute);font-size:13px}
 .row{display:grid;gap:10px;background:var(--tarmac);border-radius:6px;padding:14px;margin-bottom:10px}
 .row.app{grid-template-columns:150px minmax(0,1fr) 170px 90px auto auto}
 .row.game{grid-template-columns:repeat(6,minmax(0,1fr))}
-label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
+label,.field{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
 label.inline{flex-direction:row;align-items:center;gap:6px;color:var(--chalk);font-size:13px}
 input[type=text],input[type=number],select{background:var(--asphalt);border:1px solid var(--line);border-radius:5px;padding:7px 9px;width:100%;color:var(--chalk)}
 input[type=color]{width:44px;height:34px;border:1px solid var(--line);background:none;border-radius:5px;padding:2px}
@@ -103,7 +120,7 @@ nav button,.quit{white-space:nowrap}
 </head>
 <body>
 <header>
-  <div class="brand"><span class="kerb" aria-hidden="true"></span>SimLauncher</div>
+  <div class="brand"><span class="kerb" aria-hidden="true"></span>SimLauncher <span class="ver" id="ver"></span></div>
   <nav role="tablist">
     <button role="tab" aria-selected="true" data-v="games" data-i18n="tab_games"></button>
     <button role="tab" aria-selected="false" data-v="settings" data-i18n="tab_settings"></button>
@@ -116,6 +133,11 @@ nav button,.quit{white-space:nowrap}
   </select>
   <button class="quit" id="quit"></button>
 </header>
+<div class="upd" id="upd" hidden role="status">
+  <span id="upd-text"></span>
+  <button class="act" id="upd-go" type="button" data-i18n="upd_install"></button>
+  <a id="upd-notes" href="#" target="_blank" rel="noopener" data-i18n="upd_notes"></a>
+</div>
 
 <main>
   <section class="view on" id="v-games">
@@ -142,6 +164,14 @@ nav button,.quit{white-space:nowrap}
         <label class="inline span3"><input type="checkbox" id="s-close"> <span data-i18n="close_on_exit"></span></label>
         <label><span data-i18n="port"></span><input type="number" min="1024" max="65535" id="s-port"></label>
         <label class="inline span6"><input type="checkbox" id="s-auto"> <span data-i18n="autostart"></span> <span class="msg" id="auto-msg"></span></label>
+      </div>
+    </div>
+    <div class="block">
+      <h2 data-i18n="upd_title"></h2>
+      <div class="row game">
+        <label class="inline span3"><input type="checkbox" id="s-upd"> <span data-i18n="upd_check"></span></label>
+        <label class="inline span3"><input type="checkbox" id="s-upd-auto"> <span data-i18n="upd_auto"></span></label>
+        <span class="checks span6"><button class="mini" id="upd-now" type="button" data-i18n="upd_now"></button> <span class="msg" id="upd-msg"></span></span>
       </div>
     </div>
     <div class="block">
@@ -178,7 +208,7 @@ nav button,.quit{white-space:nowrap}
 </main>
 <script>
 const I18N={
-fr:{tab_games:"Jeux",tab_settings:"Réglages",tab_deck:"Stream Deck",quit:"Quitter",quit_tray:"Quitter SimLauncher",
+fr:{upd_title:"Mises à jour",upd_check:"Vérifier automatiquement les nouvelles versions",upd_auto:"Installer les mises à jour automatiquement (hors session de jeu)",upd_now:"Vérifier maintenant",upd_checking:"Vérification…",upd_uptodate:"SimLauncher est à jour (v{v}).",upd_err:"Vérification impossible : {e}",upd_banner:"La version {v} de SimLauncher est disponible.",upd_banner_plain:"La version {v} est disponible.",upd_install:"Mettre à jour",upd_notes:"Voir les nouveautés",upd_installing:"Installation de la version {v}… SimLauncher va redémarrer.",f_hide_name:"Masquer le nom",f_image:"Image de la carte",f_image_hint:"Photo .jpg, .png ou .webp (facultatif)",f_image_clear:"Retirer",tab_games:"Jeux",tab_settings:"Réglages",tab_deck:"Stream Deck",quit:"Quitter",quit_tray:"Quitter SimLauncher",
 quit_title:"Arrête le lanceur (les jeux et logiciels restent ouverts)",quit_tray_title:"Arrête le lanceur et retire son icône (les jeux et logiciels restent ouverts)",
 apps_title:"Logiciels",log:"Journal",idle:"Choisis un jeu pour lancer la séquence.",stopped_msg:"Lanceur arrêté. Relance SimLauncher.",
 running:"En cours",apps_one:"1 logiciel avant",apps_many:"{n} logiciels avant",launch:"Lancer",no_games:"Aucun jeu affiché. Ajoute-en dans Réglages.",
@@ -197,7 +227,7 @@ deck_title:"Boutons Stream Deck",deck_1:"Dans le logiciel Stream Deck, glisse l'
 deck_2:"Colle la commande du jeu dans le champ <b>Application/Fichier</b>, guillemets compris.",
 deck_3:"Appuie sur la touche : la séquence se lance sans ouvrir de fenêtre. Un message s'affiche seulement en cas de problème.",
 copy:"Copier",copied:"Copié",quit_done:"SimLauncher est arrêté. Tu peux fermer cette fenêtre.",error_n:"Erreur {n}"},
-en:{tab_games:"Games",tab_settings:"Settings",tab_deck:"Stream Deck",quit:"Quit",quit_tray:"Quit SimLauncher",
+en:{upd_title:"Updates",upd_check:"Check for new versions automatically",upd_auto:"Install updates automatically (never during a session)",upd_now:"Check now",upd_checking:"Checking…",upd_uptodate:"SimLauncher is up to date (v{v}).",upd_err:"Could not check: {e}",upd_banner:"SimLauncher {v} is available.",upd_banner_plain:"Version {v} is available.",upd_install:"Update now",upd_notes:"What's new",upd_installing:"Installing version {v}… SimLauncher will restart.",f_hide_name:"Hide the name",f_image:"Card image",f_image_hint:"A .jpg, .png or .webp photo (optional)",f_image_clear:"Remove",tab_games:"Games",tab_settings:"Settings",tab_deck:"Stream Deck",quit:"Quit",quit_tray:"Quit SimLauncher",
 quit_title:"Stops the launcher (games and apps stay open)",quit_tray_title:"Stops the launcher and removes its icon (games and apps stay open)",
 apps_title:"Apps",log:"Log",idle:"Pick a game to start the sequence.",stopped_msg:"Launcher stopped. Start SimLauncher again.",
 running:"Running",apps_one:"1 app first",apps_many:"{n} apps first",launch:"Launch",no_games:"No games shown. Add some in Settings.",
@@ -216,7 +246,7 @@ deck_title:"Stream Deck keys",deck_1:"In the Stream Deck app, drag the <b>System
 deck_2:"Paste the game's command into the <b>App/File</b> field, quotes included.",
 deck_3:"Press the key: the sequence runs without opening a window. A message appears only if something goes wrong.",
 copy:"Copy",copied:"Copied",quit_done:"SimLauncher has stopped. You can close this window.",error_n:"Error {n}"},
-pt:{tab_games:"Jogos",tab_settings:"Configurações",tab_deck:"Stream Deck",quit:"Sair",quit_tray:"Sair do SimLauncher",
+pt:{upd_title:"Atualizações",upd_check:"Verificar novas versões automaticamente",upd_auto:"Instalar atualizações automaticamente (nunca durante uma sessão)",upd_now:"Verificar agora",upd_checking:"Verificando…",upd_uptodate:"O SimLauncher está atualizado (v{v}).",upd_err:"Não foi possível verificar: {e}",upd_banner:"O SimLauncher {v} está disponível.",upd_banner_plain:"A versão {v} está disponível.",upd_install:"Atualizar",upd_notes:"Novidades",upd_installing:"Instalando a versão {v}… O SimLauncher será reiniciado.",f_hide_name:"Ocultar o nome",f_image:"Imagem do cartão",f_image_hint:"Foto .jpg, .png ou .webp (opcional)",f_image_clear:"Remover",tab_games:"Jogos",tab_settings:"Configurações",tab_deck:"Stream Deck",quit:"Sair",quit_tray:"Sair do SimLauncher",
 quit_title:"Encerra o iniciador (jogos e programas continuam abertos)",quit_tray_title:"Encerra o iniciador e remove o ícone (jogos e programas continuam abertos)",
 apps_title:"Programas",log:"Registro",idle:"Escolha um jogo para iniciar a sequência.",stopped_msg:"Iniciador encerrado. Abra o SimLauncher de novo.",
 running:"Em execução",apps_one:"1 programa antes",apps_many:"{n} programas antes",launch:"Iniciar",no_games:"Nenhum jogo exibido. Adicione em Configurações.",
@@ -235,7 +265,7 @@ deck_title:"Teclas do Stream Deck",deck_1:"No aplicativo Stream Deck, arraste a 
 deck_2:"Cole o comando do jogo no campo <b>Aplicativo/Arquivo</b>, com as aspas.",
 deck_3:"Pressione a tecla: a sequência roda sem abrir janela. Uma mensagem só aparece se algo der errado.",
 copy:"Copiar",copied:"Copiado",quit_done:"O SimLauncher foi encerrado. Você pode fechar esta janela.",error_n:"Erro {n}"},
-es:{tab_games:"Juegos",tab_settings:"Ajustes",tab_deck:"Stream Deck",quit:"Salir",quit_tray:"Salir de SimLauncher",
+es:{upd_title:"Actualizaciones",upd_check:"Buscar nuevas versiones automáticamente",upd_auto:"Instalar actualizaciones automáticamente (nunca durante una sesión)",upd_now:"Buscar ahora",upd_checking:"Buscando…",upd_uptodate:"SimLauncher está actualizado (v{v}).",upd_err:"No se pudo comprobar: {e}",upd_banner:"SimLauncher {v} está disponible.",upd_banner_plain:"La versión {v} está disponible.",upd_install:"Actualizar",upd_notes:"Novedades",upd_installing:"Instalando la versión {v}… SimLauncher se reiniciará.",f_hide_name:"Ocultar el nombre",f_image:"Imagen de la tarjeta",f_image_hint:"Foto .jpg, .png o .webp (opcional)",f_image_clear:"Quitar",tab_games:"Juegos",tab_settings:"Ajustes",tab_deck:"Stream Deck",quit:"Salir",quit_tray:"Salir de SimLauncher",
 quit_title:"Detiene el lanzador (los juegos y aplicaciones siguen abiertos)",quit_tray_title:"Detiene el lanzador y quita su icono (los juegos y aplicaciones siguen abiertos)",
 apps_title:"Aplicaciones",log:"Registro",idle:"Elige un juego para iniciar la secuencia.",stopped_msg:"Lanzador detenido. Vuelve a abrir SimLauncher.",
 running:"En marcha",apps_one:"1 aplicación antes",apps_many:"{n} aplicaciones antes",launch:"Lanzar",no_games:"No hay juegos visibles. Añádelos en Ajustes.",
@@ -254,7 +284,7 @@ deck_title:"Teclas de Stream Deck",deck_1:"En la aplicación Stream Deck, arrast
 deck_2:"Pega el comando del juego en el campo <b>Aplicación/Archivo</b>, con las comillas.",
 deck_3:"Pulsa la tecla: la secuencia se ejecuta sin abrir ventanas. Solo aparece un mensaje si algo falla.",
 copy:"Copiar",copied:"Copiado",quit_done:"SimLauncher se ha detenido. Puedes cerrar esta ventana.",error_n:"Error {n}"},
-zh:{tab_games:"游戏",tab_settings:"设置",tab_deck:"Stream Deck",quit:"退出",quit_tray:"退出 SimLauncher",
+zh:{upd_title:"更新",upd_check:"自动检查新版本",upd_auto:"自动安装更新（游戏进行中不会安装）",upd_now:"立即检查",upd_checking:"正在检查…",upd_uptodate:"SimLauncher 已是最新版本（v{v}）。",upd_err:"无法检查：{e}",upd_banner:"SimLauncher {v} 已发布。",upd_banner_plain:"版本 {v} 已发布。",upd_install:"立即更新",upd_notes:"更新内容",upd_installing:"正在安装版本 {v}… SimLauncher 将重新启动。",f_hide_name:"隐藏名称",f_image:"卡片图片",f_image_hint:"可选：.jpg、.png 或 .webp 照片",f_image_clear:"移除",tab_games:"游戏",tab_settings:"设置",tab_deck:"Stream Deck",quit:"退出",quit_tray:"退出 SimLauncher",
 quit_title:"停止启动器（游戏和软件保持打开）",quit_tray_title:"停止启动器并移除图标（游戏和软件保持打开）",
 apps_title:"软件",log:"日志",idle:"选择一个游戏开始启动流程。",stopped_msg:"启动器已停止。请重新打开 SimLauncher。",
 running:"运行中",apps_one:"先启动 1 个软件",apps_many:"先启动 {n} 个软件",launch:"启动",no_games:"没有显示的游戏。请在设置中添加。",
@@ -300,10 +330,11 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 });
 
 /* ----- Jeux ----- */
+function imgVer(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return (h>>>0).toString(36); }
 function renderGames(){
   const busy=state.status.busy;
   $('#plates').innerHTML=state.games.filter(g=>g.enabled).map(g=>`
-    <button class="plate ${g.running?'live':''}" style="--c:${esc(g.color||'#888')}" data-g="${esc(g.id)}" ${busy?'disabled':''}>
+    <button class="plate ${g.running?'live':''} ${g.image?'pic':''} ${g.image&&g.hideName?'noname':''}" style="--c:${esc(g.color||'#888')};${g.image?`--img:url('/api/image/${encodeURIComponent(g.id)}?v=${encodeURIComponent(imgVer(g.image))}')`:''}" data-g="${esc(g.id)}" ${busy?'disabled':''}>
       <h3>${esc(g.name)}</h3>
       <span class="meta">${g.running?`<span class="tag">${t('running')}</span>`:`<span>${g.apps.length===1?t('apps_one'):t('apps_many',{n:g.apps.length})}</span>`}<span class="go">${t('launch')}</span></span>
     </button>`).join('') || `<p>${t('no_games')}</p>`;
@@ -338,6 +369,8 @@ function renderEditor(){
   $('#s-delay').value=draft.settings.delayBeforeGame;
   $('#s-close').checked=draft.settings.closeAppsOnExit;
   $('#s-port').value=draft.settings.uiPort;
+  $('#s-upd').checked=!draft.settings.noUpdateCheck;
+  $('#s-upd-auto').checked=!!draft.settings.autoUpdate;
   const found=Object.fromEntries(state.apps.map(a=>[a.id,a.found]));
   $('#ed-apps').innerHTML=draft.apps.map((a,i)=>`
     <div class="row app" data-i="${i}">
@@ -362,6 +395,7 @@ function renderEditor(){
       <label class="span3">${t('f_exe_nosteam')}<span class="path"><input type="text" data-k="exePath" value="${esc(g.exePath)}"><button class="mini" data-pick="game" type="button">${t('f_browse')}</button></span></label>
       <label class="span2">${t('f_game_args')}<input type="text" data-k="exeArgs" value="${esc(g.exeArgs)}"></label>
       <button class="del" type="button" data-del="game">${t('f_delete')}</button>
+      <div class="span6 field">${t('f_image')}<span class="path">${g.image?`<img class="thumb" alt="" src="/api/image/${encodeURIComponent(state.config.games.some(x=>x.id===g.id&&x.image===g.image)?g.id:'')}?v=${encodeURIComponent(imgVer(g.image))}" onerror="this.style.visibility='hidden'">`:''}<input type="text" data-k="image" value="${esc(g.image||'')}" placeholder="${t('f_image_hint')}"><button class="mini" data-pick="image" type="button">${t('f_browse')}</button>${g.image?`<button class="mini" data-clearimg="1" type="button">${t('f_image_clear')}</button>`:''}<label class="inline" style="white-space:nowrap"><input type="checkbox" data-k="hideName" ${g.hideName?'checked':''} ${g.image?'':'disabled'}> ${t('f_hide_name')}</label></span></div>
       <div class="checks span6">${t('f_before')} ${draft.apps.map(a=>`<label class="inline"><input type="checkbox" data-app="${esc(a.id)}" ${g.apps.includes(a.id)?'checked':''}> ${esc(a.name)}</label>`).join('')}</div>
     </div>`).join('');
 }
@@ -372,6 +406,8 @@ function bindEditor(){
     if(tg.id==='s-delay') draft.settings.delayBeforeGame=+tg.value;
     else if(tg.id==='s-close') draft.settings.closeAppsOnExit=tg.checked;
     else if(tg.id==='s-port') draft.settings.uiPort=+tg.value;
+    else if(tg.id==='s-upd') draft.settings.noUpdateCheck=!tg.checked;
+    else if(tg.id==='s-upd-auto') draft.settings.autoUpdate=tg.checked;
     else if(tg.id==='s-auto') return;
     else if(row){
       const list=row.classList.contains('app')?draft.apps:draft.games, obj=list[+row.dataset.i];
@@ -397,9 +433,11 @@ function bindEditor(){
       [list[i],list[j]]=[list[j],list[i]];
       if(isApp){ const order=list.map(a=>a.id); draft.games.forEach(g=>g.apps.sort((a,b)=>order.indexOf(a)-order.indexOf(b))); }
       mark(); renderEditor();
+    } else if(tg.dataset.clearimg){
+      list[i].image=''; mark(); renderEditor();
     } else if(tg.dataset.pick){
-      const k=isApp?'path':'exePath';
-      try{ const r=await api('/api/pick?initial='+encodeURIComponent(list[i][k]||''),{});
+      const img=tg.dataset.pick==='image', k=img?'image':isApp?'path':'exePath';
+      try{ const r=await api('/api/pick?'+(img?'kind=image&':'')+'initial='+encodeURIComponent(list[i][k]||''),{});
         if(r.path){ list[i][k]=r.path;
           if(isApp && !list[i].process) list[i].process=r.path.split('\\').pop();
           mark(); renderEditor(); } }catch(err){alert(err.message)}
@@ -429,11 +467,39 @@ function renderDeck(){
   });
 }
 
+let bootVersion='';
+function renderUpdate(){
+  const u=state.update||{};
+  $('#ver').textContent='v'+state.version;
+  const show=u.available||u.installing;
+  $('#upd').hidden=!show;
+  if(show){
+    $('#upd-text').innerHTML=u.installing?esc(t('upd_installing',{v:u.latest})):t('upd_banner',{v:`<b>${esc(u.latest)}</b>`});
+    $('#upd-go').hidden=!!u.installing; $('#upd-go').disabled=!!u.installing;
+    $('#upd-notes').href=u.notesUrl||'#'; $('#upd-notes').hidden=!u.notesUrl;
+  }
+  const m=$('#upd-msg');
+  if(m.dataset.lock) return;
+  if(u.error){ m.className='msg err'; m.textContent=t('upd_err',{e:u.error}); }
+  else if(u.checked){ m.className='msg ok'; m.textContent=u.available?t('upd_banner_plain',{v:u.latest}):t('upd_uptodate',{v:state.version}); }
+  else m.textContent='';
+}
+$('#upd-go').onclick=async()=>{
+  $('#upd-go').disabled=true;
+  try{ await api('/api/update/install',{}); $('#upd-text').textContent=t('upd_installing',{v:state.update.latest}); $('#upd-go').hidden=true; }
+  catch(e){ alert(e.message); $('#upd-go').disabled=false; }
+};
+$('#upd-now').onclick=async()=>{
+  const m=$('#upd-msg'); m.dataset.lock='1'; m.className='msg'; m.textContent=t('upd_checking');
+  try{ await api('/api/update/check',{}); }catch(e){}
+  delete m.dataset.lock; await refresh();
+};
 async function refresh(){
   try{ state=await api('/api/state'); }catch(e){ $('#step').textContent=t('stopped_msg'); return; }
   if(langApplied!==state.lang){ L=state.lang; langApplied=L; applyI18n(); renderEditor(); }
   if(document.activeElement!==$('#lang')) $('#lang').value=state.config.settings.language||'auto';
-  renderGames(); renderDeck();
+  if(!bootVersion) bootVersion=state.version; else if(state.version!==bootVersion){ location.reload(); return; }
+  renderGames(); renderDeck(); renderUpdate();
   if(document.activeElement!==$('#s-auto')) $('#s-auto').checked=state.autostart;
   $('#quit').textContent=state.tray?t('quit_tray'):t('quit');
   $('#quit').title=state.tray?t('quit_tray_title'):t('quit_title');

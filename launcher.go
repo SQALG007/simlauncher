@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -226,4 +227,8 @@ func setupLog() {
 		log.SetOutput(f)
 	}
 	log.SetFlags(log.LstdFlags)
+	// En cas de plantage, la trace d'erreur de Go est écrite ici (sinon elle est perdue : pas de console).
+	if cf, err := os.OpenFile(filepath.Join(configDir(), "crash.log"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644); err == nil {
+		_ = debug.SetCrashOutput(cf, debug.CrashOptions{})
+	}
 }

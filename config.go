@@ -32,13 +32,17 @@ type Game struct {
 	Process    string   `json:"process"` // processus du jeu (pour surveiller sa fermeture)
 	Apps       []string `json:"apps"`    // IDs des logiciels à démarrer avant ce jeu
 	Color      string   `json:"color"`
+	Image      string   `json:"image,omitempty"`    // photo choisie par l'utilisateur pour la carte du jeu
+	HideName   bool     `json:"hideName,omitempty"` // n'affiche pas le nom sur la carte (l'image contient déjà le logo)
 }
 
 type Settings struct {
 	DelayBeforeGame int    `json:"delayBeforeGame"` // pause après le démarrage des logiciels
 	CloseAppsOnExit bool   `json:"closeAppsOnExit"` // fermer les logiciels marqués quand le jeu se termine
 	UIPort          int    `json:"uiPort"`
-	Language        string `json:"language"` // "auto", fr, en, pt, es, zh
+	Language        string `json:"language"`                // "auto", fr, en, pt, es, zh
+	NoUpdateCheck   bool   `json:"noUpdateCheck,omitempty"` // ne pas vérifier les nouvelles versions
+	AutoUpdate      bool   `json:"autoUpdate,omitempty"`    // installer les mises à jour sans demander
 }
 
 type Config struct {
@@ -166,6 +170,9 @@ func (c *Config) validate() error {
 		seen["game:"+g.ID] = true
 		if strings.TrimSpace(g.Name) == "" {
 			return TE("v_game_name", g.ID)
+		}
+		if g.Image != "" && !isImagePath(g.Image) {
+			return TE("v_game_image", g.Name)
 		}
 		if strings.TrimSpace(g.SteamAppID) == "" && strings.TrimSpace(g.ExePath) == "" {
 			return TE("v_game_launch", g.Name)

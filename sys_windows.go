@@ -3,9 +3,9 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -110,64 +110,32 @@ func messageBox(title, text string) {
 	procMessageBoxW.Call(0, uintptr(unsafe.Pointer(m)), uintptr(unsafe.Pointer(t)), 0x30 /*MB_ICONWARNING*/)
 }
 
-var (
-	comdlg32             = syscall.NewLazyDLL("comdlg32.dll")
-	procGetOpenFileNameW = comdlg32.NewProc("GetOpenFileNameW")
-	ole32                = syscall.NewLazyDLL("ole32.dll")
-	procCoInitializeEx   = ole32.NewProc("CoInitializeEx")
-)
-
-type openFileName struct {
-	lStructSize       uint32
-	hwndOwner         uintptr
-	hInstance         uintptr
-	lpstrFilter       *uint16
-	lpstrCustomFilter *uint16
-	nMaxCustFilter    uint32
-	nFilterIndex      uint32
-	lpstrFile         *uint16
-	nMaxFile          uint32
-	lpstrFileTitle    *uint16
-	nMaxFileTitle     uint32
-	lpstrInitialDir   *uint16
-	lpstrTitle        *uint16
-	Flags             uint32
-	nFileOffset       uint16
-	nFileExtension    uint16
-	lpstrDefExt       *uint16
-	lCustData         uintptr
-	lpfnHook          uintptr
-	lpTemplateName    *uint16
-	pvReserved        uintptr
-	dwReserved        uint32
-	FlagsEx           uint32
-}
-
-// pickFile ouvre la boîte de dialogue Windows « Ouvrir » et renvoie le chemin choisi.
-func pickFile(initial string) (string, error) {
-	ch := make(chan [2]string)
-	go func() {
-		runtime.LockOSThread()
-		defer runtime.UnlockOSThread()
-		procCoInitializeEx.Call(0, 2)
-		buf := make([]uint16, 1024)
-		if initial != "" {
-			copy(buf, syscall.StringToUTF16(initial))
-		}
-		filter := syscall.StringToUTF16(T("pick_exe") + "\x00*.exe\x00" + T("pick_all") + "\x00*.*\x00\x00")
-		title, _ := syscall.UTF16PtrFromString(T("pick_title"))
-		ofn := openFileName{lpstrFilter: &filter[0], lpstrFile: &buf[0], nMaxFile: uint32(len(buf)), lpstrTitle: title,
-			Flags: 0x1000 | 0x800 | 0x8 | 0x80000}
-		ofn.lStructSize = uint32(unsafe.Sizeof(ofn))
-		r, _, _ := procGetOpenFileNameW.Call(uintptr(unsafe.Pointer(&ofn)))
-		if r == 0 {
-			ch <- [2]string{"", ""}
-			return
-		}
-		ch <- [2]string{syscall.UTF16ToString(buf), ""}
-	}()
-	res := <-ch
-	return res[0], nil
+// pickFile ouvre la boîte de dialogue « Ouvrir » et renvoie le chemin choisi ("" si annulé).
+// Elle tourne dans un PowerShell séparé (OpenFileDialog de .NET) : un souci dans la
+// boîte de dialogue ou une extension de l'Explorateur ne peut pas faire tomber SimLauncher.
+func pickFile(initial string, image bool) (string, error) {
+	filter := T("pick_exe") + "|*.exe|" + T("pick_all") + "|*.*"
+	title := T("pick_title")
+	if image {
+		filter = T("pick_image") + "|*.jpg;*.jpeg;*.png;*.webp;*.gif;*.bmp|" + T("pick_all") + "|*.*"
+		title = T("pick_image_title")
+	}
+	const script = `[Console]::OutputEncoding=[Text.Encoding]::UTF8
+Add-Type -AssemblyName System.Windows.Forms
+$owner=New-Object System.Windows.Forms.Form -Property @{TopMost=$true;ShowInTaskbar=$false}
+$d=New-Object System.Windows.Forms.OpenFileDialog
+$d.Filter=$env:SL_FILTER; $d.Title=$env:SL_TITLE; $d.CheckFileExists=$true
+if($env:SL_INITIAL){ try{ $d.InitialDirectory=[IO.Path]::GetDirectoryName($env:SL_INITIAL); $d.FileName=[IO.Path]::GetFileName($env:SL_INITIAL) }catch{} }
+if($d.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK){ [Console]::Out.Write($d.FileName) }`
+	cmd := exec.Command("powershell.exe", "-NoProfile", "-NonInteractive", "-STA", "-ExecutionPolicy", "Bypass", "-Command", script)
+	cmd.Env = append(os.Environ(), "SL_FILTER="+filter, "SL_TITLE="+title, "SL_INITIAL="+initial)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000}
+	out, err := cmd.Output()
+	if err != nil {
+		log.Printf("Boîte « Ouvrir » : %v", err)
+		return "", TE("pick_fail", err)
+	}
+	return strings.TrimSpace(string(out)), nil
 }
 
 var procGetUserDefaultUILanguage = syscall.NewLazyDLL("kernel32.dll").NewProc("GetUserDefaultUILanguage")

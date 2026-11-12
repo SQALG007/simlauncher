@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -42,9 +43,13 @@ type stateResp struct {
 	Tray      bool        `json:"tray"`
 	Autostart bool        `json:"autostart"`
 	Lang      string      `json:"lang"`
+	Update    UpdateInfo  `json:"update"`
 }
 
 var trayMode bool
+
+// justUpdated : relancé par une mise à jour (l'ancienne instance libère le port dans la seconde).
+var justUpdated bool
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -75,7 +80,7 @@ func buildState() (stateResp, error) {
 	}
 	running, _ := sysImpl.Running()
 	exe, _ := os.Executable()
-	s := stateResp{Config: c, Status: getStatus(), ExePath: exe, CfgPath: configPath(), Version: version, Tray: trayMode, Autostart: getAutostart(), Lang: lang()}
+	s := stateResp{Config: c, Status: getStatus(), ExePath: exe, CfgPath: configPath(), Version: version, Tray: trayMode, Autostart: getAutostart(), Lang: lang(), Update: getUpdate()}
 	for _, a := range c.Apps {
 		s.Apps = append(s.Apps, appState{App: a, Running: isRunning(running, a.Process), Found: sysImpl.FileExists(a.Path)})
 	}
@@ -84,6 +89,12 @@ func buildState() (stateResp, error) {
 		s.Games = append(s.Games, gameState{Game: g, Running: isRunning(running, g.Process), Found: found})
 	}
 	return s, nil
+}
+
+var imageExts = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true, ".gif": true, ".bmp": true}
+
+func isImagePath(p string) bool {
+	return imageExts[strings.ToLower(filepath.Ext(p))]
 }
 
 func newMux() *http.ServeMux {
@@ -185,12 +196,43 @@ func newMux() *http.ServeMux {
 	}))
 
 	mux.HandleFunc("/api/pick", guard(func(w http.ResponseWriter, r *http.Request) {
-		p, err := pickFile(r.URL.Query().Get("initial"))
+		p, err := pickFile(r.URL.Query().Get("initial"), r.URL.Query().Get("kind") == "image")
 		if err != nil {
 			writeErr(w, 400, err)
 			return
 		}
 		writeJSON(w, 200, map[string]string{"path": p})
+	}))
+
+	// Image d'un jeu : ne sert que le fichier choisi dans les réglages, et seulement si c'est une image.
+	mux.HandleFunc("/api/image/", func(w http.ResponseWriter, r *http.Request) {
+		c, err := loadConfig()
+		if err != nil {
+			http.Error(w, "config", 500)
+			return
+		}
+		g, ok := c.game(strings.TrimPrefix(r.URL.Path, "/api/image/"))
+		if !ok || g.Image == "" || !isImagePath(g.Image) {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", "no-cache")
+		http.ServeFile(w, r, g.Image)
+	})
+
+	mux.HandleFunc("/api/update/check", guard(func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, 200, checkUpdate())
+	}))
+	mux.HandleFunc("/api/update/install", guard(func(w http.ResponseWriter, r *http.Request) {
+		if st := getStatus(); st.Busy {
+			writeErr(w, 409, TE("busy", st.Game))
+			return
+		}
+		if err := installUpdate(); err != nil {
+			writeErr(w, 500, err)
+			return
+		}
+		writeJSON(w, 202, map[string]bool{"ok": true})
 	}))
 
 	mux.HandleFunc("/api/quit", guard(func(w http.ResponseWriter, r *http.Request) {
@@ -247,6 +289,10 @@ func runUI(c Config, tray bool) error {
 	addr := fmt.Sprintf("127.0.0.1:%d", c.Settings.UIPort)
 	url := "http://" + addr + "/"
 	ln, err := net.Listen("tcp", addr)
+	for i := 0; err != nil && justUpdated && i < 30; i++ {
+		time.Sleep(500 * time.Millisecond) // l'ancienne version est en train de quitter
+		ln, err = net.Listen("tcp", addr)
+	}
 	if err != nil {
 		if !tray {
 			openUI(url) // une instance tourne déjà
@@ -255,6 +301,7 @@ func runUI(c Config, tray bool) error {
 	}
 	trayMode = tray
 	lastPing.Store(time.Now().Unix())
+	go updateLoop()
 	if tray {
 		go func() {
 			if err := http.Serve(ln, newMux()); err != nil {
@@ -272,6 +319,8 @@ func runUI(c Config, tray bool) error {
 			}
 		}
 	}()
-	openUI(url)
+	if !justUpdated { // après une mise à jour, la fenêtre déjà ouverte se recharge toute seule
+		openUI(url)
+	}
 	return http.Serve(ln, newMux())
 }

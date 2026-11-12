@@ -55,9 +55,9 @@ func (f *fakeSys) FileExists(path string) bool {
 	return true
 }
 
-func openUI(url string)                       { fmt.Println("UI:", url) }
-func messageBox(title, text string)           { fmt.Println(title+":", text) }
-func pickFile(initial string) (string, error) { return "", TE("no_pick") }
+func openUI(url string)                                   { fmt.Println("UI:", url) }
+func messageBox(title, text string)                       { fmt.Println(title+":", text) }
+func pickFile(initial string, image bool) (string, error) { return "", TE("no_pick") }
 
 func systemLang() string { return envLang() }
 

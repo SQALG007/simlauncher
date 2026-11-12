@@ -16,6 +16,8 @@ A VR sim racing session usually means opening four or five programs in the right
 - **Already running? Skipped.** Apps and games that are already open are not started twice.
 - **Starting lights**: five lights follow the sequence and turn green when the game is launched.
 - **Optional auto-close**: when the game exits, close the apps you marked (for example Crew Chief).
+- **Your own game pictures**: pick any .jpg, .png or .webp image in Settings and it becomes the background of that game's card.
+- **Built-in updates**: SimLauncher checks GitHub Releases for new versions and updates itself in one click, or automatically if you allow it (never during a session). Downloads are checked against the release's SHA-256.
 - **Stream Deck ready**: every game has a command line to paste into a *System › Open* key. Key icons are included in `assets/streamdeck`.
 - **Tray icon**: start with Windows as an icon next to the clock. Right-click to launch a game, double-click to open the interface.
 - **MCP server**: let an AI assistant (Claude Desktop and others) list and launch your games.

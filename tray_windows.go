@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+	"unicode/utf16"
 	"unsafe"
 )
 
@@ -115,7 +116,7 @@ var (
 )
 
 func setUTF16(dst []uint16, s string) {
-	u := syscall.StringToUTF16(s)
+	u := append(utf16.Encode([]rune(strings.ReplaceAll(s, "\x00", ""))), 0)
 	if len(u) > len(dst) {
 		u = append(u[:len(dst)-1], 0)
 	}
