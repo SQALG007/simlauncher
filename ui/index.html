@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SimLauncher</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 2%22%3E%3Crect width=%221%22 height=%222%22 fill=%22%23d42a2a%22/%3E%3Crect x=%221%22 width=%221%22 height=%222%22 fill=%22%23efeee8%22/%3E%3Crect x=%222%22 width=%221%22 height=%222%22 fill=%22%23d42a2a%22/%3E%3Crect x=%223%22 width=%221%22 height=%222%22 fill=%22%23efeee8%22/%3E%3C/svg%3E">
+<style>
+:root{
+  --asphalt:#26282c; --tarmac:#33363b; --line:#474b52;
+  --chalk:#efeee8; --mute:#a3a6ad;
+  --kerb:#d42a2a; --go:#2fb36b; --amber:#f2b705;
+  --cond: "Bahnschrift", "DIN Alternate", "Arial Narrow", sans-serif;
+  --body: "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--asphalt);color:var(--chalk);font:15px/1.5 var(--body)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+header{display:flex;align-items:center;gap:28px;padding:14px 28px;border-bottom:1px solid var(--line)}
+.brand{font-family:var(--cond);font-stretch:condensed;font-weight:700;font-size:26px;letter-spacing:.02em;display:flex;align-items:center;gap:12px}
+.kerb{width:34px;height:14px;background:repeating-linear-gradient(90deg,var(--kerb) 0 8.5px,var(--chalk) 8.5px 17px);border-radius:2px}
+nav{display:flex;gap:4px}
+nav button{background:none;border:0;padding:8px 14px;border-radius:6px;color:var(--mute);cursor:pointer;font-family:var(--cond);font-size:17px}
+nav button[aria-selected=true]{color:var(--chalk);background:var(--tarmac)}
+header .spacer{flex:1}
+.quit{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;color:var(--mute);cursor:pointer}
+
+main{padding:24px 28px 40px;max-width:1240px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+
+/* ---- Jeux ---- */
+.paddock{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
+.plates{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.plate{position:relative;text-align:left;background:var(--chalk);color:#1d1e21;border:0;border-radius:4px;padding:16px 16px 14px 22px;cursor:pointer;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.plate::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;border-radius:4px 0 0 4px;background:var(--c,#888)}
+.plate h3{margin:0;font-family:var(--cond);font-stretch:condensed;font-weight:700;font-size:25px;line-height:1.05}
+.plate .meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#55585e}
+.plate .go{font-family:var(--cond);font-weight:700;font-size:15px;color:#1d1e21}
+.plate:hover .go,.plate:focus-visible .go{color:var(--kerb)}
+.plate[disabled]{opacity:.45;cursor:not-allowed}
+.plate.live{outline:3px solid var(--go)}
+.plate .tag{font-size:12px;background:var(--go);color:#fff;border-radius:3px;padding:1px 6px}
+
+.wall{background:var(--tarmac);border-radius:6px;padding:20px}
+.wall h2{font-family:var(--cond);font-weight:700;font-size:19px;margin:0 0 12px}
+.lights{display:flex;gap:10px;justify-content:center;padding:14px 0 6px}
+.lamp{width:38px;height:38px;border-radius:50%;background:#1c1d20;box-shadow:inset 0 0 0 3px #111}
+.lamp.red{background:var(--kerb);box-shadow:0 0 14px var(--kerb)}
+.lamp.green{background:var(--go);box-shadow:0 0 14px var(--go)}
+.step{min-height:44px;text-align:center;color:var(--chalk);font-size:14px;margin-bottom:14px}
+.apps{list-style:none;margin:0 0 16px;padding:0}
+.apps li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.dot{width:10px;height:10px;border-radius:50%;background:#5a5e66;flex:none}
+.dot.on{background:var(--go)}
+.dot.miss{background:var(--amber)}
+.apps .n{flex:1}
+.apps .n small{display:block;color:var(--amber);font-size:12px}
+.mini{background:none;border:1px solid var(--line);border-radius:5px;padding:3px 10px;cursor:pointer;color:var(--mute);font-size:13px}
+.mini:hover{color:var(--chalk)}
+details summary{cursor:pointer;color:var(--mute);font-size:13px}
+.log{font:12px/1.5 Consolas,monospace;color:var(--mute);max-height:220px;overflow:auto;white-space:pre-wrap;margin-top:8px}
+
+/* ---- Réglages ---- */
+.block{margin-bottom:34px}
+.block h2{font-family:var(--cond);font-weight:700;font-size:22px;margin:0 0 4px}
+.block p.hint{margin:0 0 14px;color:var(--mute);max-width:70ch}
+.row{display:grid;gap:10px;background:var(--tarmac);border-radius:6px;padding:14px;margin-bottom:10px}
+.row.app{grid-template-columns:150px minmax(0,1fr) 170px 90px auto auto}
+.row.game{grid-template-columns:repeat(6,minmax(0,1fr))}
+label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute)}
+label.inline{flex-direction:row;align-items:center;gap:6px;color:var(--chalk);font-size:13px}
+input[type=text],input[type=number],select{background:var(--asphalt);border:1px solid var(--line);border-radius:5px;padding:7px 9px;width:100%;color:var(--chalk)}
+input[type=color]{width:44px;height:34px;border:1px solid var(--line);background:none;border-radius:5px;padding:2px}
+.path{display:flex;gap:6px}
+.span2{grid-column:span 2}.span3{grid-column:span 3}.span6{grid-column:1/-1}
+.checks{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.del{background:none;border:0;color:var(--mute);cursor:pointer;align-self:end;padding:8px}
+.del:hover{color:var(--kerb)}
+.add{background:none;border:1px dashed var(--line);border-radius:6px;padding:9px 14px;color:var(--mute);cursor:pointer}
+.bar{position:sticky;bottom:0;display:flex;gap:12px;align-items:center;padding:14px 0;background:var(--asphalt);border-top:1px solid var(--line)}
+.primary{background:var(--kerb);border:0;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer;color:#fff}
+.ghost{background:none;border:1px solid var(--line);border-radius:6px;padding:10px 16px;cursor:pointer;color:var(--mute)}
+.msg{font-size:14px}.msg.err{color:#ff8a80}.msg.ok{color:var(--go)}
+.missing{color:var(--amber);font-size:12px}
+
+/* ---- Stream Deck ---- */
+.sd{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.sd code{font:13px Consolas,monospace;background:var(--tarmac);padding:8px 10px;border-radius:5px;overflow-x:auto;white-space:nowrap}
+.howto{max-width:72ch;color:var(--mute)}
+.howto li{margin-bottom:6px}
+
+@media (max-width:900px){
+  .paddock{grid-template-columns:1fr}
+  .row.app,.row.game{grid-template-columns:1fr 1fr}
+  .sd{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.lang{width:auto;background:var(--asphalt);border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--chalk)}
+nav button,.quit{white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="kerb" aria-hidden="true"></span>SimLauncher</div>
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-v="games" data-i18n="tab_games"></button>
+    <button role="tab" aria-selected="false" data-v="settings" data-i18n="tab_settings"></button>
+    <button role="tab" aria-selected="false" data-v="deck" data-i18n="tab_deck"></button>
+  </nav>
+  <span class="spacer"></span>
+  <select class="lang" id="lang" aria-label="Language">
+    <option value="auto">Auto</option><option value="fr">Français</option><option value="en">English</option>
+    <option value="pt">Português</option><option value="es">Español</option><option value="zh">中文</option>
+  </select>
+  <button class="quit" id="quit"></button>
+</header>
+
+<main>
+  <section class="view on" id="v-games">
+    <div class="paddock">
+      <div class="plates" id="plates"></div>
+      <aside class="wall">
+        <div class="lights" aria-hidden="true">
+          <span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span>
+        </div>
+        <div class="step" id="step" aria-live="polite"></div>
+        <h2 data-i18n="apps_title"></h2>
+        <ul class="apps" id="apps"></ul>
+        <details><summary data-i18n="log"></summary><div class="log" id="log"></div></details>
+      </aside>
+    </div>
+  </section>
+
+  <section class="view" id="v-settings">
+    <div class="block">
+      <h2 data-i18n="seq_title"></h2>
+      <p class="hint" data-i18n="seq_hint"></p>
+      <div class="row game">
+        <label><span data-i18n="pause"></span><input type="number" min="0" max="120" id="s-delay"></label>
+        <label class="inline span3"><input type="checkbox" id="s-close"> <span data-i18n="close_on_exit"></span></label>
+        <label><span data-i18n="port"></span><input type="number" min="1024" max="65535" id="s-port"></label>
+        <label class="inline span6"><input type="checkbox" id="s-auto"> <span data-i18n="autostart"></span> <span class="msg" id="auto-msg"></span></label>
+      </div>
+    </div>
+    <div class="block">
+      <h2 data-i18n="apps_edit_title"></h2>
+      <p class="hint" data-i18n="apps_hint"></p>
+      <div id="ed-apps"></div>
+      <button class="add" id="add-app" data-i18n="add_app"></button>
+    </div>
+    <div class="block">
+      <h2 data-i18n="games_title"></h2>
+      <p class="hint" data-i18n="games_hint"></p>
+      <div id="ed-games"></div>
+      <button class="add" id="add-game" data-i18n="add_game"></button>
+    </div>
+    <div class="bar">
+      <button class="primary" id="save" data-i18n="save"></button>
+      <button class="ghost" id="revert" data-i18n="revert"></button>
+      <button class="ghost" id="reset" data-i18n="reset"></button>
+      <span class="msg" id="msg" role="status"></span>
+    </div>
+  </section>
+
+  <section class="view" id="v-deck">
+    <div class="block">
+      <h2 data-i18n="deck_title"></h2>
+      <ol class="howto">
+        <li data-i18n-html="deck_1"></li>
+        <li data-i18n-html="deck_2"></li>
+        <li data-i18n-html="deck_3"></li>
+      </ol>
+      <div id="sd"></div>
+    </div>
+  </section>
+</main>
+<script>
+const I18N={
+fr:{tab_games:"Jeux",tab_settings:"Réglages",tab_deck:"Stream Deck",quit:"Quitter",quit_tray:"Quitter SimLauncher",
+quit_title:"Arrête le lanceur (les jeux et logiciels restent ouverts)",quit_tray_title:"Arrête le lanceur et retire son icône (les jeux et logiciels restent ouverts)",
+apps_title:"Logiciels",log:"Journal",idle:"Choisis un jeu pour lancer la séquence.",stopped_msg:"Lanceur arrêté. Relance SimLauncher.",
+running:"En cours",apps_one:"1 logiciel avant",apps_many:"{n} logiciels avant",launch:"Lancer",no_games:"Aucun jeu affiché. Ajoute-en dans Réglages.",
+exe_missing:"Exécutable introuvable",close:"Fermer",start:"Démarrer",
+seq_title:"Séquence",seq_hint:"Les logiciels se lancent dans l'ordre de la liste ci-dessous, puis le jeu après la pause.",
+pause:"Pause avant le jeu (s)",close_on_exit:"Fermer les logiciels cochés « fermer après » quand le jeu se termine",port:"Port de l'interface",
+autostart:"Démarrer avec Windows, en icône près de l'horloge",auto_on:"Activé",auto_off:"Désactivé",
+apps_edit_title:"Logiciels compagnons",apps_hint:"Le nom du processus sert à savoir si le logiciel tourne déjà. Il apparaît dans le Gestionnaire des tâches, onglet Détails.",
+add_app:"Ajouter un logiciel",games_title:"Jeux",games_hint:"Indique un AppID Steam, ou un exécutable pour les jeux hors Steam. L'identifiant court sert au Stream Deck.",
+add_game:"Ajouter un jeu",save:"Enregistrer",revert:"Annuler les modifications",reset:"Réglages d'origine",unsaved:"Modifications non enregistrées",saved:"Enregistré",
+reset_confirm:"Remettre tous les réglages d'origine ?",del_confirm:"Supprimer « {name} » ?",
+f_name:"Nom",f_exe:"Exécutable",f_missing:"introuvable",f_browse:"Parcourir",f_process:"Processus",f_wait:"Attente (s)",f_close_after:"Fermer après",f_delete:"Supprimer",
+f_args:"Arguments",f_id:"Identifiant",f_up:"Monter",f_down:"Descendre",f_steam:"AppID Steam",f_game_process:"Processus du jeu",f_shown:"Affiché",
+f_exe_nosteam:"Exécutable (hors Steam)",f_game_args:"Arguments du jeu",f_before:"Avant le jeu :",new_app:"Nouveau logiciel",new_game:"Nouveau jeu",
+deck_title:"Boutons Stream Deck",deck_1:"Dans le logiciel Stream Deck, glisse l'action <b>Système › Ouvrir</b> sur une touche.",
+deck_2:"Colle la commande du jeu dans le champ <b>Application/Fichier</b>, guillemets compris.",
+deck_3:"Appuie sur la touche : la séquence se lance sans ouvrir de fenêtre. Un message s'affiche seulement en cas de problème.",
+copy:"Copier",copied:"Copié",quit_done:"SimLauncher est arrêté. Tu peux fermer cette fenêtre.",error_n:"Erreur {n}"},
+en:{tab_games:"Games",tab_settings:"Settings",tab_deck:"Stream Deck",quit:"Quit",quit_tray:"Quit SimLauncher",
+quit_title:"Stops the launcher (games and apps stay open)",quit_tray_title:"Stops the launcher and removes its icon (games and apps stay open)",
+apps_title:"Apps",log:"Log",idle:"Pick a game to start the sequence.",stopped_msg:"Launcher stopped. Start SimLauncher again.",
+running:"Running",apps_one:"1 app first",apps_many:"{n} apps first",launch:"Launch",no_games:"No games shown. Add some in Settings.",
+exe_missing:"Executable not found",close:"Close",start:"Start",
+seq_title:"Sequence",seq_hint:"Apps start in the order of the list below, then the game after the pause.",
+pause:"Pause before the game (s)",close_on_exit:"Close the apps marked “close after” when the game exits",port:"Interface port",
+autostart:"Start with Windows, as an icon next to the clock",auto_on:"On",auto_off:"Off",
+apps_edit_title:"Companion apps",apps_hint:"The process name tells whether the app is already running. You can find it in Task Manager, Details tab.",
+add_app:"Add an app",games_title:"Games",games_hint:"Enter a Steam AppID, or an executable for non-Steam games. The short ID is used by the Stream Deck.",
+add_game:"Add a game",save:"Save",revert:"Discard changes",reset:"Restore defaults",unsaved:"Unsaved changes",saved:"Saved",
+reset_confirm:"Restore all default settings?",del_confirm:"Delete “{name}”?",
+f_name:"Name",f_exe:"Executable",f_missing:"not found",f_browse:"Browse",f_process:"Process",f_wait:"Wait (s)",f_close_after:"Close after",f_delete:"Delete",
+f_args:"Arguments",f_id:"ID",f_up:"Move up",f_down:"Move down",f_steam:"Steam AppID",f_game_process:"Game process",f_shown:"Shown",
+f_exe_nosteam:"Executable (non-Steam)",f_game_args:"Game arguments",f_before:"Before the game:",new_app:"New app",new_game:"New game",
+deck_title:"Stream Deck keys",deck_1:"In the Stream Deck app, drag the <b>System › Open</b> action onto a key.",
+deck_2:"Paste the game's command into the <b>App/File</b> field, quotes included.",
+deck_3:"Press the key: the sequence runs without opening a window. A message appears only if something goes wrong.",
+copy:"Copy",copied:"Copied",quit_done:"SimLauncher has stopped. You can close this window.",error_n:"Error {n}"},
+pt:{tab_games:"Jogos",tab_settings:"Configurações",tab_deck:"Stream Deck",quit:"Sair",quit_tray:"Sair do SimLauncher",
+quit_title:"Encerra o iniciador (jogos e programas continuam abertos)",quit_tray_title:"Encerra o iniciador e remove o ícone (jogos e programas continuam abertos)",
+apps_title:"Programas",log:"Registro",idle:"Escolha um jogo para iniciar a sequência.",stopped_msg:"Iniciador encerrado. Abra o SimLauncher de novo.",
+running:"Em execução",apps_one:"1 programa antes",apps_many:"{n} programas antes",launch:"Iniciar",no_games:"Nenhum jogo exibido. Adicione em Configurações.",
+exe_missing:"Executável não encontrado",close:"Fechar",start:"Iniciar",
+seq_title:"Sequência",seq_hint:"Os programas iniciam na ordem da lista abaixo e, depois da pausa, o jogo.",
+pause:"Pausa antes do jogo (s)",close_on_exit:"Fechar os programas marcados “fechar depois” quando o jogo terminar",port:"Porta da interface",
+autostart:"Iniciar com o Windows, como ícone ao lado do relógio",auto_on:"Ativado",auto_off:"Desativado",
+apps_edit_title:"Programas auxiliares",apps_hint:"O nome do processo indica se o programa já está em execução. Ele aparece no Gerenciador de Tarefas, aba Detalhes.",
+add_app:"Adicionar programa",games_title:"Jogos",games_hint:"Informe um AppID da Steam, ou um executável para jogos fora da Steam. O ID curto é usado pelo Stream Deck.",
+add_game:"Adicionar jogo",save:"Salvar",revert:"Descartar alterações",reset:"Restaurar padrões",unsaved:"Alterações não salvas",saved:"Salvo",
+reset_confirm:"Restaurar todas as configurações padrão?",del_confirm:"Excluir “{name}”?",
+f_name:"Nome",f_exe:"Executável",f_missing:"não encontrado",f_browse:"Procurar",f_process:"Processo",f_wait:"Espera (s)",f_close_after:"Fechar depois",f_delete:"Excluir",
+f_args:"Argumentos",f_id:"ID",f_up:"Subir",f_down:"Descer",f_steam:"AppID da Steam",f_game_process:"Processo do jogo",f_shown:"Exibido",
+f_exe_nosteam:"Executável (fora da Steam)",f_game_args:"Argumentos do jogo",f_before:"Antes do jogo:",new_app:"Novo programa",new_game:"Novo jogo",
+deck_title:"Teclas do Stream Deck",deck_1:"No aplicativo Stream Deck, arraste a ação <b>Sistema › Abrir</b> para uma tecla.",
+deck_2:"Cole o comando do jogo no campo <b>Aplicativo/Arquivo</b>, com as aspas.",
+deck_3:"Pressione a tecla: a sequência roda sem abrir janela. Uma mensagem só aparece se algo der errado.",
+copy:"Copiar",copied:"Copiado",quit_done:"O SimLauncher foi encerrado. Você pode fechar esta janela.",error_n:"Erro {n}"},
+es:{tab_games:"Juegos",tab_settings:"Ajustes",tab_deck:"Stream Deck",quit:"Salir",quit_tray:"Salir de SimLauncher",
+quit_title:"Detiene el lanzador (los juegos y aplicaciones siguen abiertos)",quit_tray_title:"Detiene el lanzador y quita su icono (los juegos y aplicaciones siguen abiertos)",
+apps_title:"Aplicaciones",log:"Registro",idle:"Elige un juego para iniciar la secuencia.",stopped_msg:"Lanzador detenido. Vuelve a abrir SimLauncher.",
+running:"En marcha",apps_one:"1 aplicación antes",apps_many:"{n} aplicaciones antes",launch:"Lanzar",no_games:"No hay juegos visibles. Añádelos en Ajustes.",
+exe_missing:"Ejecutable no encontrado",close:"Cerrar",start:"Iniciar",
+seq_title:"Secuencia",seq_hint:"Las aplicaciones se inician en el orden de la lista de abajo y, tras la pausa, el juego.",
+pause:"Pausa antes del juego (s)",close_on_exit:"Cerrar las aplicaciones marcadas «cerrar después» cuando el juego termine",port:"Puerto de la interfaz",
+autostart:"Iniciar con Windows, como icono junto al reloj",auto_on:"Activado",auto_off:"Desactivado",
+apps_edit_title:"Aplicaciones complementarias",apps_hint:"El nombre del proceso indica si la aplicación ya está en marcha. Aparece en el Administrador de tareas, pestaña Detalles.",
+add_app:"Añadir aplicación",games_title:"Juegos",games_hint:"Indica un AppID de Steam, o un ejecutable para juegos fuera de Steam. El ID corto lo usa el Stream Deck.",
+add_game:"Añadir juego",save:"Guardar",revert:"Descartar cambios",reset:"Restaurar valores",unsaved:"Cambios sin guardar",saved:"Guardado",
+reset_confirm:"¿Restaurar todos los ajustes predeterminados?",del_confirm:"¿Eliminar «{name}»?",
+f_name:"Nombre",f_exe:"Ejecutable",f_missing:"no encontrado",f_browse:"Examinar",f_process:"Proceso",f_wait:"Espera (s)",f_close_after:"Cerrar después",f_delete:"Eliminar",
+f_args:"Argumentos",f_id:"ID",f_up:"Subir",f_down:"Bajar",f_steam:"AppID de Steam",f_game_process:"Proceso del juego",f_shown:"Visible",
+f_exe_nosteam:"Ejecutable (fuera de Steam)",f_game_args:"Argumentos del juego",f_before:"Antes del juego:",new_app:"Nueva aplicación",new_game:"Nuevo juego",
+deck_title:"Teclas de Stream Deck",deck_1:"En la aplicación Stream Deck, arrastra la acción <b>Sistema › Abrir</b> a una tecla.",
+deck_2:"Pega el comando del juego en el campo <b>Aplicación/Archivo</b>, con las comillas.",
+deck_3:"Pulsa la tecla: la secuencia se ejecuta sin abrir ventanas. Solo aparece un mensaje si algo falla.",
+copy:"Copiar",copied:"Copiado",quit_done:"SimLauncher se ha detenido. Puedes cerrar esta ventana.",error_n:"Error {n}"},
+zh:{tab_games:"游戏",tab_settings:"设置",tab_deck:"Stream Deck",quit:"退出",quit_tray:"退出 SimLauncher",
+quit_title:"停止启动器（游戏和软件保持打开）",quit_tray_title:"停止启动器并移除图标（游戏和软件保持打开）",
+apps_title:"软件",log:"日志",idle:"选择一个游戏开始启动流程。",stopped_msg:"启动器已停止。请重新打开 SimLauncher。",
+running:"运行中",apps_one:"先启动 1 个软件",apps_many:"先启动 {n} 个软件",launch:"启动",no_games:"没有显示的游戏。请在设置中添加。",
+exe_missing:"找不到可执行文件",close:"关闭",start:"启动",
+seq_title:"启动流程",seq_hint:"软件按下方列表顺序启动，等待之后再启动游戏。",
+pause:"启动游戏前等待（秒）",close_on_exit:"游戏退出时关闭标记为“之后关闭”的软件",port:"界面端口",
+autostart:"随 Windows 启动，显示为时钟旁的图标",auto_on:"已启用",auto_off:"已停用",
+apps_edit_title:"配套软件",apps_hint:"进程名用于判断软件是否已在运行，可在任务管理器的“详细信息”选项卡中找到。",
+add_app:"添加软件",games_title:"游戏",games_hint:"填写 Steam AppID，非 Steam 游戏请填写可执行文件。短 ID 供 Stream Deck 使用。",
+add_game:"添加游戏",save:"保存",revert:"放弃更改",reset:"恢复默认",unsaved:"有未保存的更改",saved:"已保存",
+reset_confirm:"恢复所有默认设置？",del_confirm:"删除“{name}”？",
+f_name:"名称",f_exe:"可执行文件",f_missing:"未找到",f_browse:"浏览",f_process:"进程",f_wait:"等待（秒）",f_close_after:"之后关闭",f_delete:"删除",
+f_args:"参数",f_id:"ID",f_up:"上移",f_down:"下移",f_steam:"Steam AppID",f_game_process:"游戏进程",f_shown:"显示",
+f_exe_nosteam:"可执行文件（非 Steam）",f_game_args:"游戏参数",f_before:"游戏前启动：",new_app:"新软件",new_game:"新游戏",
+deck_title:"Stream Deck 按键",deck_1:"在 Stream Deck 软件中，把 <b>系统 › 打开</b> 操作拖到一个按键上。",
+deck_2:"将游戏的命令粘贴到 <b>应用程序/文件</b> 栏，包括引号。",
+deck_3:"按下按键：启动流程在后台运行，不会打开窗口。只有出现问题时才会显示消息。",
+copy:"复制",copied:"已复制",quit_done:"SimLauncher 已停止。可以关闭此窗口。",error_n:"错误 {n}"}
+};
+let L='en';
+const t=(k,v={})=>((I18N[L]&&I18N[L][k])??I18N.en[k]??k).replace(/\{(\w+)\}/g,(_,x)=>v[x]??'');
+function applyI18n(){
+  document.documentElement.lang=L;
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(e=>e.innerHTML=t(e.dataset.i18nHtml));
+}
+
+const $=s=>document.querySelector(s);
+let state=null, draft=null, dirty=false, langApplied=null;
+
+async function api(path,body){
+  const r=await fetch(path,{method:body===undefined?'GET':'POST',headers:{'X-SimLauncher':'1','Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error||t('error_n',{n:r.status}));
+  return j;
+}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));
+  if(b.dataset.v==='settings'&&!dirty) loadDraft();
+});
+
+/* ----- Jeux ----- */
+function renderGames(){
+  const busy=state.status.busy;
+  $('#plates').innerHTML=state.games.filter(g=>g.enabled).map(g=>`
+    <button class="plate ${g.running?'live':''}" style="--c:${esc(g.color||'#888')}" data-g="${esc(g.id)}" ${busy?'disabled':''}>
+      <h3>${esc(g.name)}</h3>
+      <span class="meta">${g.running?`<span class="tag">${t('running')}</span>`:`<span>${g.apps.length===1?t('apps_one'):t('apps_many',{n:g.apps.length})}</span>`}<span class="go">${t('launch')}</span></span>
+    </button>`).join('') || `<p>${t('no_games')}</p>`;
+  document.querySelectorAll('.plate').forEach(p=>p.onclick=()=>launch(p.dataset.g));
+
+  $('#apps').innerHTML=state.apps.map(a=>`
+    <li><span class="dot ${!a.found?'miss':a.running?'on':''}"></span>
+      <span class="n">${esc(a.name)}${!a.found?`<small>${t('exe_missing')}</small>`:''}</span>
+      ${a.running?`<button class="mini" data-a="${esc(a.id)}" data-act="stop">${t('close')}</button>`:`<button class="mini" data-a="${esc(a.id)}" data-act="start" ${a.found?'':'disabled'}>${t('start')}</button>`}
+    </li>`).join('');
+  document.querySelectorAll('.mini[data-a]').forEach(b=>b.onclick=async()=>{
+    b.disabled=true; try{await api(`/api/app/${b.dataset.a}/${b.dataset.act}`,{})}catch(e){alert(e.message)} refresh();
+  });
+
+  const st=state.status, lamps=[...document.querySelectorAll('.lamp')];
+  const hist=st.history||[];
+  const lit=st.total?Math.round(st.done/st.total*5):0;
+  lamps.forEach((l,i)=>{ l.className='lamp'+(st.busy?(i<lit?' red':''):(st.result==='ok'||st.result==='warn'?' green':'')); });
+  $('#step').textContent=st.step||t('idle');
+  $('#log').textContent=hist.join('\n');
+}
+async function launch(id){
+  try{await api('/api/launch/'+id,{}); refresh()}catch(e){alert(e.message)}
+}
+
+/* ----- Réglages ----- */
+function loadDraft(){ draft=structuredClone(state.config); dirty=false; renderEditor(); $('#msg').textContent=''; }
+function mark(){dirty=true; $('#msg').className='msg'; $('#msg').textContent=t('unsaved');}
+
+function renderEditor(){
+  if(!draft) return;
+  $('#s-delay').value=draft.settings.delayBeforeGame;
+  $('#s-close').checked=draft.settings.closeAppsOnExit;
+  $('#s-port').value=draft.settings.uiPort;
+  const found=Object.fromEntries(state.apps.map(a=>[a.id,a.found]));
+  $('#ed-apps').innerHTML=draft.apps.map((a,i)=>`
+    <div class="row app" data-i="${i}">
+      <label>${t('f_name')}<input type="text" data-k="name" value="${esc(a.name)}"></label>
+      <label>${t('f_exe')} ${found[a.id]===false?`<span class="missing">${t('f_missing')}</span>`:''}
+        <span class="path"><input type="text" data-k="path" value="${esc(a.path)}"><button class="mini" data-pick="app" type="button">${t('f_browse')}</button></span></label>
+      <label>${t('f_process')}<input type="text" data-k="process" value="${esc(a.process)}"></label>
+      <label>${t('f_wait')}<input type="number" min="0" max="120" data-k="delayAfter" value="${a.delayAfter}"></label>
+      <label class="inline"><input type="checkbox" data-k="closeOnExit" ${a.closeOnExit?'checked':''}> ${t('f_close_after')}</label>
+      <button class="del" type="button" data-del="app">${t('f_delete')}</button>
+      <label class="span2">${t('f_args')}<input type="text" data-k="args" value="${esc(a.args)}"></label>
+      <label>${t('f_id')}<input type="text" data-k="id" value="${esc(a.id)}"></label>
+      <span class="checks span3"><button class="mini" data-move="-1" type="button">${t('f_up')}</button><button class="mini" data-move="1" type="button">${t('f_down')}</button></span>
+    </div>`).join('');
+  $('#ed-games').innerHTML=draft.games.map((g,i)=>`
+    <div class="row game" data-i="${i}">
+      <label class="span2">${t('f_name')}<input type="text" data-k="name" value="${esc(g.name)}"></label>
+      <label>${t('f_id')}<input type="text" data-k="id" value="${esc(g.id)}"></label>
+      <label>${t('f_steam')}<input type="text" data-k="steamAppId" value="${esc(g.steamAppId)}"></label>
+      <label>${t('f_game_process')}<input type="text" data-k="process" value="${esc(g.process)}"></label>
+      <label class="inline"><input type="color" data-k="color" value="${esc(g.color||'#888888')}"> <input type="checkbox" data-k="enabled" ${g.enabled?'checked':''}> ${t('f_shown')}</label>
+      <label class="span3">${t('f_exe_nosteam')}<span class="path"><input type="text" data-k="exePath" value="${esc(g.exePath)}"><button class="mini" data-pick="game" type="button">${t('f_browse')}</button></span></label>
+      <label class="span2">${t('f_game_args')}<input type="text" data-k="exeArgs" value="${esc(g.exeArgs)}"></label>
+      <button class="del" type="button" data-del="game">${t('f_delete')}</button>
+      <div class="checks span6">${t('f_before')} ${draft.apps.map(a=>`<label class="inline"><input type="checkbox" data-app="${esc(a.id)}" ${g.apps.includes(a.id)?'checked':''}> ${esc(a.name)}</label>`).join('')}</div>
+    </div>`).join('');
+}
+
+function bindEditor(){
+  $('#v-settings').addEventListener('input',e=>{
+    const tg=e.target, row=tg.closest('.row[data-i]');
+    if(tg.id==='s-delay') draft.settings.delayBeforeGame=+tg.value;
+    else if(tg.id==='s-close') draft.settings.closeAppsOnExit=tg.checked;
+    else if(tg.id==='s-port') draft.settings.uiPort=+tg.value;
+    else if(tg.id==='s-auto') return;
+    else if(row){
+      const list=row.classList.contains('app')?draft.apps:draft.games, obj=list[+row.dataset.i];
+      if(tg.dataset.app){ obj.apps=tg.checked?[...new Set([...obj.apps,tg.dataset.app])]:obj.apps.filter(x=>x!==tg.dataset.app); }
+      else if(tg.dataset.k){
+        const v=tg.type==='checkbox'?tg.checked:tg.type==='number'?+tg.value:tg.value;
+        if(tg.dataset.k==='id' && row.classList.contains('app')){ const old=obj.id; draft.games.forEach(g=>g.apps=g.apps.map(x=>x===old?v:x)); }
+        obj[tg.dataset.k]=v;
+      }
+    } else return;
+    mark();
+  });
+  $('#v-settings').addEventListener('click',async e=>{
+    const tg=e.target, row=tg.closest('.row[data-i]');
+    if(!row) return;
+    const isApp=row.classList.contains('app'), list=isApp?draft.apps:draft.games, i=+row.dataset.i;
+    if(tg.dataset.del){
+      if(!confirm(t('del_confirm',{name:list[i].name}))) return;
+      if(isApp){ const id=list[i].id; draft.games.forEach(g=>g.apps=g.apps.filter(x=>x!==id)); }
+      list.splice(i,1); mark(); renderEditor();
+    } else if(tg.dataset.move){
+      const j=i+ +tg.dataset.move; if(j<0||j>=list.length) return;
+      [list[i],list[j]]=[list[j],list[i]];
+      if(isApp){ const order=list.map(a=>a.id); draft.games.forEach(g=>g.apps.sort((a,b)=>order.indexOf(a)-order.indexOf(b))); }
+      mark(); renderEditor();
+    } else if(tg.dataset.pick){
+      const k=isApp?'path':'exePath';
+      try{ const r=await api('/api/pick?initial='+encodeURIComponent(list[i][k]||''),{});
+        if(r.path){ list[i][k]=r.path;
+          if(isApp && !list[i].process) list[i].process=r.path.split('\\').pop();
+          mark(); renderEditor(); } }catch(err){alert(err.message)}
+    }
+  });
+  $('#add-app').onclick=()=>{ const n=draft.apps.length+1; draft.apps.push({id:'app'+n,name:t('new_app'),path:'',args:'',process:'',delayAfter:2,closeOnExit:false}); mark(); renderEditor(); };
+  $('#add-game').onclick=()=>{ const n=draft.games.length+1; draft.games.push({id:'game'+n,name:t('new_game'),enabled:true,steamAppId:'',exePath:'',exeArgs:'',process:'',apps:draft.apps.map(a=>a.id),color:'#888888'}); mark(); renderEditor(); };
+  $('#save').onclick=async()=>{
+    const order=draft.apps.map(a=>a.id); draft.games.forEach(g=>g.apps.sort((a,b)=>order.indexOf(a)-order.indexOf(b)));
+    draft.settings.language=state.config.settings.language;
+    try{ await api('/api/config',draft); dirty=false; $('#msg').className='msg ok'; $('#msg').textContent=t('saved'); await refresh(); renderEditor(); }
+    catch(e){ $('#msg').className='msg err'; $('#msg').textContent=e.message; }
+  };
+  $('#revert').onclick=()=>loadDraft();
+  $('#reset').onclick=async()=>{ if(!confirm(t('reset_confirm'))) return; await api('/api/reset',{}); await refresh(); loadDraft(); };
+}
+
+/* ----- Stream Deck ----- */
+function renderDeck(){
+  const exe=state.exePath;
+  $('#sd').innerHTML=state.config.games.map(g=>{
+    const cmd=`"${exe}" --game ${g.id}`;
+    return `<div class="sd"><strong>${esc(g.name)}</strong><code>${esc(cmd)}</code><button class="mini" data-copy="${esc(cmd)}">${t('copy')}</button></div>`;
+  }).join('');
+  document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
+    await navigator.clipboard.writeText(b.dataset.copy); b.textContent=t('copied'); setTimeout(()=>b.textContent=t('copy'),1500);
+  });
+}
+
+async function refresh(){
+  try{ state=await api('/api/state'); }catch(e){ $('#step').textContent=t('stopped_msg'); return; }
+  if(langApplied!==state.lang){ L=state.lang; langApplied=L; applyI18n(); renderEditor(); }
+  if(document.activeElement!==$('#lang')) $('#lang').value=state.config.settings.language||'auto';
+  renderGames(); renderDeck();
+  if(document.activeElement!==$('#s-auto')) $('#s-auto').checked=state.autostart;
+  $('#quit').textContent=state.tray?t('quit_tray'):t('quit');
+  $('#quit').title=state.tray?t('quit_tray_title'):t('quit_title');
+  if(!draft) loadDraft();
+}
+$('#lang').addEventListener('change',async e=>{
+  try{ await api('/api/language',{language:e.target.value}); await refresh(); }catch(err){ alert(err.message); }
+});
+$('#s-auto').addEventListener('change',async e=>{
+  e.stopPropagation();
+  try{ const r=await api('/api/autostart',{on:e.target.checked}); $('#auto-msg').className='msg ok'; $('#auto-msg').textContent=r.on?t('auto_on'):t('auto_off'); }
+  catch(err){ e.target.checked=!e.target.checked; $('#auto-msg').className='msg err'; $('#auto-msg').textContent=err.message; }
+});
+$('#quit').onclick=async()=>{ await api('/api/quit',{}).catch(()=>{}); window.close(); document.body.innerHTML=`<main><p>${esc(t('quit_done'))}</p></main>`; };
+L=(navigator.language||'en').slice(0,2); if(!I18N[L]) L='en'; applyI18n();
+bindEditor(); refresh(); setInterval(refresh,1500);
+</script>
+</body>
+</html>
