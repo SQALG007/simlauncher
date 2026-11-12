@@ -69,3 +69,18 @@ func TestUpdateCheckAndDownload(t *testing.T) {
 		t.Fatal("un exe hors des releases du projet ne doit pas être proposé")
 	}
 }
+
+func TestRemoveOldExes(t *testing.T) {
+	dir := t.TempDir()
+	exe := filepath.Join(dir, "SimLauncher.exe")
+	for _, n := range []string{"SimLauncher.exe", "SimLauncher.exe.old", "SimLauncher.exe.old-1794517000", "Autre.exe.old"} {
+		os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644)
+	}
+	if left := removeOldExes(exe); left != 0 {
+		t.Fatalf("%d fichiers non supprimés", left)
+	}
+	l, _ := filepath.Glob(filepath.Join(dir, "*"))
+	if len(l) != 2 {
+		t.Fatalf("restants : %v", l)
+	}
+}

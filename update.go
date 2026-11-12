@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -157,12 +158,14 @@ func installUpdate() error {
 		return fail(TE("upd_fail", err))
 	}
 	log.Printf("Mise à jour vers %s…", info.Latest)
-	newPath, oldPath := exe+".new", exe+".old"
+	// Nom unique pour l'ancien exe : un autre processus (le serveur MCP lancé par Claude Desktop,
+	// par exemple) peut encore utiliser celui d'une mise à jour précédente.
+	newPath, oldPath := exe+".new", fmt.Sprintf("%s.old-%d", exe, time.Now().Unix())
+	removeOldExes(exe)
 	if err := download(info, newPath); err != nil {
 		os.Remove(newPath)
 		return fail(err)
 	}
-	os.Remove(oldPath)
 	// Windows autorise à renommer un exe en cours d'exécution, pas à l'écraser.
 	if err := os.Rename(exe, oldPath); err != nil {
 		os.Remove(newPath)
@@ -227,17 +230,25 @@ func download(info UpdateInfo, dst string) error {
 	return nil
 }
 
-// cleanupOldExe supprime l'ancien exe laissé par une mise à jour (il peut être encore verrouillé quelques secondes).
+// removeOldExes supprime les anciens exe laissés par les mises à jour (ceux encore utilisés restent).
+func removeOldExes(exe string) (left int) {
+	old, _ := filepath.Glob(exe + ".old*")
+	for _, p := range old {
+		if os.Remove(p) != nil {
+			left++
+		}
+	}
+	return left
+}
+
+// cleanupOldExe réessaie pendant 20 s : l'ancienne instance met un moment à se fermer.
 func cleanupOldExe() {
 	exe, err := os.Executable()
 	if err != nil {
 		return
 	}
 	go func() {
-		for i := 0; i < 20; i++ {
-			if err := os.Remove(exe + ".old"); err == nil || os.IsNotExist(err) {
-				return
-			}
+		for i := 0; i < 20 && removeOldExes(exe) > 0; i++ {
 			time.Sleep(time.Second)
 		}
 	}()
