@@ -199,6 +199,7 @@ SimLauncher ne se connecte qu'à GitHub (vérification et téléchargement des m
 - **Un logiciel affiche « Exécutable introuvable »** : corrige son chemin dans Réglages › Logiciels compagnons.
 - **Les logiciels ne se ferment pas à la fin du jeu** : le processus du jeu est faux ou vide. Vérifie-le dans le Gestionnaire des tâches › Détails.
 - **« Détecter mes jeux Steam » ne trouve rien** : Steam doit être installé pour l'utilisateur Windows actuel. Les jeux des autres bibliothèques sont trouvés grâce au fichier `libraryfolders.vdf` de Steam.
+- **Un logiciel ne se ferme pas (« tourne en administrateur »)** : Windows interdit à un programme normal de fermer un programme lancé en administrateur. Désactive *Exécuter en tant qu'administrateur* pour ce logiciel (Propriétés › Compatibilité), ou ferme-le à la main.
 - **Deux `SimLauncher.exe` dans le Gestionnaire des tâches après avoir quitté** : ce sont les serveurs MCP lancés par Claude Desktop (`--mcp`). Ils se ferment avec Claude Desktop.
 - **La mise à jour échoue avec « Accès refusé »** : SimLauncher est dans un dossier protégé comme `Program Files`. Déplace l'exe dans un dossier à toi.
 - **Autre chose** : joins `launcher.log` (et `crash.log` s'il n'est pas vide) à une [issue](../../issues).
@@ -231,6 +232,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Version | Changements |
 |---|---|
+| 1.5.1 | Message clair quand un logiciel ne peut pas être fermé parce qu'il tourne en administrateur. |
 | 1.5.0 | Profils de séquence (cartes, icône, `--profile`, Stream Deck, MCP) et temps de jeu par jeu. |
 | 1.4.1 | Les mises à jour fonctionnent même si le serveur MCP de Claude Desktop utilise encore l'ancien exe. |
 | 1.4.0 | Détection des jeux Steam avec images, *Fin de session* (bouton, icône, `--end`, MCP), webhooks Home Assistant, outils MCP `end_session`, `scan_steam_games`, `import_steam_games`. |

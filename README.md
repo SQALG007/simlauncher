@@ -199,6 +199,7 @@ SimLauncher only connects to GitHub (update check and download) and to the webho
 - **An app shows "Executable not found"**: fix its path in Settings › Companion apps.
 - **Apps don't close when the game exits**: the game's process name is wrong or empty. Check it in Task Manager › Details.
 - **"Find my Steam games" finds nothing**: Steam must be installed for the current Windows user. Games in other libraries are found through Steam's `libraryfolders.vdf`.
+- **An app won't close ("runs as administrator")**: Windows doesn't let a normal program close an elevated one. Turn off *Run as administrator* for that app (Properties › Compatibility), or close it by hand.
 - **Two `SimLauncher.exe` in Task Manager after quitting**: they are the MCP servers started by Claude Desktop (`--mcp`). They close with Claude Desktop.
 - **The update fails with "Access denied"**: SimLauncher is in a protected folder such as `Program Files`. Move the exe to a folder you own.
 - **Something else**: send `launcher.log` (and `crash.log` if it isn't empty) in an [issue](../../issues).
@@ -231,6 +232,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.5.1 | Clear message when an app can't be closed because it runs as administrator. |
 | 1.5.0 | Sequence profiles (cards, tray, `--profile`, Stream Deck, MCP) and play time per game. |
 | 1.4.1 | Updates work even when Claude Desktop's MCP server still uses the previous exe. |
 | 1.4.0 | Steam detection with pictures, *End session* (button, tray, `--end`, MCP), Home Assistant webhooks, MCP tools `end_session`, `scan_steam_games`, `import_steam_games`. |

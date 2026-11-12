@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const version = "1.5.0"
+const version = "1.5.1"
 
 func main() {
 	gameID := flag.String("game", "", "lance le jeu indiqué (ex. ams2) sans interface — pour le Stream Deck")

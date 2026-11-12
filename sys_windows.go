@@ -81,7 +81,47 @@ func (s winSys) Kill(process string) error {
 			return nil
 		}
 	}
-	return hidden(exec.Command("taskkill", "/F", "/IM", process)).Run()
+	// Toujours ouvert : fermeture forcée, processus par processus.
+	denied := false
+	for _, pid := range pidsOf(process) {
+		h, err := syscall.OpenProcess(syscall.PROCESS_TERMINATE, false, pid)
+		if err != nil {
+			if err == syscall.ERROR_ACCESS_DENIED {
+				denied = true
+			}
+			continue
+		}
+		if err := syscall.TerminateProcess(h, 1); err == syscall.ERROR_ACCESS_DENIED {
+			denied = true
+		}
+		syscall.CloseHandle(h)
+	}
+	time.Sleep(500 * time.Millisecond)
+	if r, err := s.Running(); err == nil && r[strings.ToLower(process)] {
+		if denied {
+			return TE("kill_admin", process)
+		}
+		return TE("kill_fail", process)
+	}
+	return nil
+}
+
+// pidsOf renvoie les identifiants des processus portant ce nom.
+func pidsOf(process string) []uint32 {
+	snap, err := syscall.CreateToolhelp32Snapshot(syscall.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		return nil
+	}
+	defer syscall.CloseHandle(snap)
+	var pe syscall.ProcessEntry32
+	pe.Size = uint32(unsafe.Sizeof(pe))
+	var out []uint32
+	for err := syscall.Process32First(snap, &pe); err == nil; err = syscall.Process32Next(snap, &pe) {
+		if strings.EqualFold(syscall.UTF16ToString(pe.ExeFile[:]), process) {
+			out = append(out, pe.ProcessID)
+		}
+	}
+	return out
 }
 
 func (winSys) FileExists(path string) bool {
