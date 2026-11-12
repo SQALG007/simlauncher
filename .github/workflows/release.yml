@@ -25,7 +25,7 @@ jobs:
       - name: Install rsrc (icon embedding)
         run: go install github.com/akavel/rsrc@v0.10.2
       - name: Build Windows exe
-        run: ./build.sh
+        run: sh ./build.sh
       - uses: actions/upload-artifact@v4
         with:
           name: SimLauncher
