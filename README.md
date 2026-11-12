@@ -72,14 +72,16 @@ The default setup is a Pimax + MOZA + SimHub + Crew Chief rig with AMS2, ACC, As
 
 ## Settings
 
+Settings are split into tabs on the left. *Save* applies the changes of every tab at once.
+
 | Section | What you set |
 |---|---|
-| **Sequence** | Pause before the game, auto-close of apps when the game exits, start with Windows, interface port. |
+| **General** | Pause before the game, auto-close of apps when the game exits, start with Windows, interface port. |
+| **Games** | *Find my Steam games*, then one line per game (click to expand): name, ID, Steam AppID or executable, arguments, process name, colour, card picture (*Browse* or *Steam picture*), *Hide the name*, apps to start first. |
+| **Apps** | One line per companion app: name, path, arguments, process name, delay after start, *Close after* (closed when the game exits). The order of the list is the start order. |
+| **Profiles** | Name, ID and the apps allowed in each profile. A game only starts the apps it has *and* the profile allows. |
+| **Integrations** | Home Assistant and webhooks: two URLs called at the start and end of a session, each with a *Test* button. See [below](#home-assistant-and-webhooks). |
 | **Updates** | Check for new versions automatically (on by default), install them automatically (off by default), *Check now*. |
-| **Home Assistant and webhooks** | Two URLs called at the start and end of a session, each with a *Test* button. See [below](#home-assistant-and-webhooks). |
-| **Sequence profiles** | Name, ID and the apps allowed in each profile. A game only starts the apps it has *and* the profile allows. |
-| **Companion apps** | Name, path, arguments, process name, delay after start, *Close after* (closed when the game exits). The order of the list is the start order. |
-| **Games** | *Find my Steam games*, then for each game: name, ID, Steam AppID or executable, arguments, process name, colour, card picture (*Browse* or *Steam picture*), *Hide the name*, apps to start first. |
 
 **Process names** (for example `AMS2AVX.exe`) let SimLauncher know whether something is already running, and close it at the end. The exact name is in Task Manager › Details.
 
@@ -232,7 +234,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
-| 1.5.1 | Clear message when an app can't be closed because it runs as administrator. |
+| 1.5.1 | Settings split into tabs with collapsible lines; clear message when an app can't be closed because it runs as administrator. |
 | 1.5.0 | Sequence profiles (cards, tray, `--profile`, Stream Deck, MCP) and play time per game. |
 | 1.4.1 | Updates work even when Claude Desktop's MCP server still uses the previous exe. |
 | 1.4.0 | Steam detection with pictures, *End session* (button, tray, `--end`, MCP), Home Assistant webhooks, MCP tools `end_session`, `scan_steam_games`, `import_steam_games`. |

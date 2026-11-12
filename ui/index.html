@@ -113,6 +113,26 @@ input[type=color]{width:44px;height:34px;border:1px solid var(--line);background
 .hook{display:flex;gap:8px;align-items:center}
 .hook input{flex:1}
 .add{background:none;border:1px dashed var(--line);border-radius:6px;padding:9px 14px;color:var(--mute);cursor:pointer}
+.setwrap{display:grid;grid-template-columns:190px minmax(0,1fr);gap:28px;align-items:start}
+.subnav{display:flex;flex-direction:column;gap:2px;position:sticky;top:12px}
+.subnav button{text-align:left;background:none;border:0;border-radius:6px;padding:9px 12px;color:var(--mute);cursor:pointer;font-family:var(--cond);font-size:16px}
+.subnav button:hover{color:var(--chalk)}
+.subnav button[aria-selected=true]{color:var(--chalk);background:var(--tarmac);box-shadow:inset 3px 0 0 var(--red,#d62828)}
+.subnav .count{font-family:inherit;font-size:12px;color:var(--mute);margin-left:6px}
+.pane{display:none}.pane.on{display:block}
+details.item{background:var(--tarmac);border-radius:6px;margin-bottom:8px}
+details.item>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-radius:6px}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary::before{content:"▸";color:var(--mute);width:10px}
+details.item[open]>summary::before{content:"▾"}
+details.item>summary:hover{background:rgba(255,255,255,.03)}
+details.item .sw{width:6px;height:28px;border-radius:2px;flex:none}
+details.item .sthumb{width:64px;height:30px;object-fit:cover;border-radius:3px;background:#111;flex:none}
+details.item .sname{font-weight:600}
+details.item .smeta{color:var(--mute);font-size:13px;margin-left:auto;text-align:right}
+details.item .smeta .warn{color:#ff8a80}
+details.item>.row{margin:0;background:none;border-top:1px solid var(--line);border-radius:0 0 6px 6px}
+@media (max-width:820px){.setwrap{grid-template-columns:1fr}.subnav{flex-direction:row;flex-wrap:wrap;position:static}}
 .bar{position:sticky;bottom:0;display:flex;gap:12px;align-items:center;padding:14px 0;background:var(--asphalt);border-top:1px solid var(--line)}
 .primary{background:var(--kerb);border:0;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer;color:#fff}
 .ghost{background:none;border:1px solid var(--line);border-radius:6px;padding:10px 16px;cursor:pointer;color:var(--mute)}
@@ -174,59 +194,83 @@ nav button,.quit{white-space:nowrap}
   </section>
 
   <section class="view" id="v-settings">
-    <div class="block">
-      <h2 data-i18n="seq_title"></h2>
-      <p class="hint" data-i18n="seq_hint"></p>
-      <div class="row game">
-        <label><span data-i18n="pause"></span><input type="number" min="0" max="120" id="s-delay"></label>
-        <label class="inline span3"><input type="checkbox" id="s-close"> <span data-i18n="close_on_exit"></span></label>
-        <label><span data-i18n="port"></span><input type="number" min="1024" max="65535" id="s-port"></label>
-        <label class="inline span6"><input type="checkbox" id="s-auto"> <span data-i18n="autostart"></span> <span class="msg" id="auto-msg"></span></label>
+    <div class="setwrap">
+      <div class="subnav" role="tablist">
+        <button role="tab" data-sv="general" data-i18n="sv_general"></button>
+        <button role="tab" data-sv="games" data-i18n="sv_games"></button>
+        <button role="tab" data-sv="apps" data-i18n="sv_apps"></button>
+        <button role="tab" data-sv="profiles" data-i18n="sv_profiles"></button>
+        <button role="tab" data-sv="integrations" data-i18n="sv_integrations"></button>
+        <button role="tab" data-sv="updates" data-i18n="sv_updates"></button>
       </div>
-    </div>
-    <div class="block">
-      <h2 data-i18n="upd_title"></h2>
-      <div class="row game">
-        <label class="inline span3"><input type="checkbox" id="s-upd"> <span data-i18n="upd_check"></span></label>
-        <label class="inline span3"><input type="checkbox" id="s-upd-auto"> <span data-i18n="upd_auto"></span></label>
-        <span class="checks span6"><button class="mini" id="upd-now" type="button" data-i18n="upd_now"></button> <span class="msg" id="upd-msg"></span></span>
-      </div>
-    </div>
-    <div class="block">
-      <h2 data-i18n="hook_title"></h2>
-      <p class="hint" data-i18n-html="hook_hint"></p>
-      <div class="row game">
-        <label class="span6"><span data-i18n="hook_start"></span><span class="hook"><input type="url" id="s-hook-start" placeholder="http://homeassistant.local:8123/api/webhook/simlauncher_start"><button class="mini" type="button" data-hooktest="start" data-i18n="hook_test"></button></span></label>
-        <label class="span6"><span data-i18n="hook_end"></span><span class="hook"><input type="url" id="s-hook-end" placeholder="http://homeassistant.local:8123/api/webhook/simlauncher_end"><button class="mini" type="button" data-hooktest="end" data-i18n="hook_test"></button></span></label>
-        <span class="msg span6" id="hook-msg"></span>
-      </div>
-    </div>
-    <div class="block">
-      <h2 data-i18n="apps_edit_title"></h2>
-      <p class="hint" data-i18n="apps_hint"></p>
-      <div id="ed-apps"></div>
-      <button class="add" id="add-app" data-i18n="add_app"></button>
-    </div>
-    <div class="block">
-      <h2 data-i18n="prof_title"></h2>
-      <p class="hint" data-i18n="prof_hint"></p>
-      <div id="ed-profs"></div>
-      <button class="add" id="add-prof" data-i18n="prof_add"></button>
-    </div>
-    <div class="block">
-      <h2 data-i18n="games_title"></h2>
-      <p class="hint" data-i18n="games_hint"></p>
-      <div class="row game">
-        <span class="checks span6"><button class="mini" id="steam-scan" type="button" data-i18n="steam_scan"></button>
-        <label class="inline"><input type="checkbox" id="steam-all"> <span data-i18n="steam_all"></span></label>
-        <span class="msg" id="steam-msg"></span></span>
-        <div class="span6" id="steam-box" hidden>
-          <div class="steam-list" id="steam-list"></div>
-          <button class="primary" id="steam-add" type="button" data-i18n="steam_add"></button>
+      <div class="panes">
+      <div class="pane" data-pane="general">
+          <div class="block">
+            <h2 data-i18n="seq_title"></h2>
+            <p class="hint" data-i18n="seq_hint"></p>
+            <div class="row game">
+              <label><span data-i18n="pause"></span><input type="number" min="0" max="120" id="s-delay"></label>
+              <label class="inline span3"><input type="checkbox" id="s-close"> <span data-i18n="close_on_exit"></span></label>
+              <label><span data-i18n="port"></span><input type="number" min="1024" max="65535" id="s-port"></label>
+              <label class="inline span6"><input type="checkbox" id="s-auto"> <span data-i18n="autostart"></span> <span class="msg" id="auto-msg"></span></label>
+            </div>
+          </div>
         </div>
-      </div>
-      <div id="ed-games"></div>
-      <button class="add" id="add-game" data-i18n="add_game"></button>
+        <div class="pane" data-pane="games">
+          <div class="block">
+            <h2 data-i18n="games_title"></h2>
+            <p class="hint" data-i18n="games_hint"></p>
+            <div class="row game">
+              <span class="checks span6"><button class="mini" id="steam-scan" type="button" data-i18n="steam_scan"></button>
+              <label class="inline"><input type="checkbox" id="steam-all"> <span data-i18n="steam_all"></span></label>
+              <span class="msg" id="steam-msg"></span></span>
+              <div class="span6" id="steam-box" hidden>
+                <div class="steam-list" id="steam-list"></div>
+                <button class="primary" id="steam-add" type="button" data-i18n="steam_add"></button>
+              </div>
+            </div>
+            <div id="ed-games"></div>
+            <button class="add" id="add-game" data-i18n="add_game"></button>
+          </div>
+        </div>
+        <div class="pane" data-pane="apps">
+          <div class="block">
+            <h2 data-i18n="apps_edit_title"></h2>
+            <p class="hint" data-i18n="apps_hint"></p>
+            <div id="ed-apps"></div>
+            <button class="add" id="add-app" data-i18n="add_app"></button>
+          </div>
+        </div>
+        <div class="pane" data-pane="profiles">
+          <div class="block">
+            <h2 data-i18n="prof_title"></h2>
+            <p class="hint" data-i18n="prof_hint"></p>
+            <div id="ed-profs"></div>
+            <button class="add" id="add-prof" data-i18n="prof_add"></button>
+          </div>
+        </div>
+        <div class="pane" data-pane="integrations">
+          <div class="block">
+            <h2 data-i18n="hook_title"></h2>
+            <p class="hint" data-i18n-html="hook_hint"></p>
+            <div class="row game">
+              <label class="span6"><span data-i18n="hook_start"></span><span class="hook"><input type="url" id="s-hook-start" placeholder="http://homeassistant.local:8123/api/webhook/simlauncher_start"><button class="mini" type="button" data-hooktest="start" data-i18n="hook_test"></button></span></label>
+              <label class="span6"><span data-i18n="hook_end"></span><span class="hook"><input type="url" id="s-hook-end" placeholder="http://homeassistant.local:8123/api/webhook/simlauncher_end"><button class="mini" type="button" data-hooktest="end" data-i18n="hook_test"></button></span></label>
+              <span class="msg span6" id="hook-msg"></span>
+            </div>
+          </div>
+        </div>
+        <div class="pane" data-pane="updates">
+          <div class="block">
+            <h2 data-i18n="upd_title"></h2>
+            <div class="row game">
+              <label class="inline span3"><input type="checkbox" id="s-upd"> <span data-i18n="upd_check"></span></label>
+              <label class="inline span3"><input type="checkbox" id="s-upd-auto"> <span data-i18n="upd_auto"></span></label>
+              <span class="checks span6"><button class="mini" id="upd-now" type="button" data-i18n="upd_now"></button> <span class="msg" id="upd-msg"></span></span>
+            </div>
+          </div>
+        </div>
+        </div>
     </div>
     <div class="bar">
       <button class="primary" id="save" data-i18n="save"></button>
@@ -250,12 +294,12 @@ nav button,.quit{white-space:nowrap}
 </main>
 <script>
 const I18N={
-fr:{prof_title:"Profils de séquence",prof_hint:"Un profil choisit quels logiciels démarrent, par exemple « VR » avec le casque et « Écran » sans. Chaque carte affiche alors un bouton par profil ; un clic ailleurs sur la carte utilise le premier. Sans profil, chaque jeu démarre tous ses logiciels.",prof_add:"Ajouter un profil",prof_new:"Nouveau profil",prof_apps:"Logiciels autorisés :",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"aujourd'hui",pt_yesterday:"hier",pt_days:"il y a {n} j",end_btn:"Fin de session",end_confirm:"Fermer le jeu et tous les logiciels ?",steam_scan:"Détecter mes jeux Steam",steam_all:"Tous les jeux, pas seulement la course",steam_scanning:"Recherche…",steam_found:"{n} jeu(x) à ajouter.",steam_none:"Aucun jeu trouvé.",steam_already:"Déjà dans SimLauncher",steam_add:"Ajouter la sélection",steam_added:"{n} jeu(x) ajouté(s), avec leur image Steam.",steam_dirty:"Tes modifications non enregistrées seront perdues. Continuer ?",steam_img:"Image Steam",hook_title:"Home Assistant et webhooks",hook_hint:"SimLauncher envoie une requête POST (JSON : <code>event</code>, <code>game_id</code>, <code>game</code>) au début et à la fin de chaque session. Avec Home Assistant, crée une automatisation déclenchée par un <b>webhook</b> et colle son URL ici.",hook_start:"Début de session",hook_end:"Fin de session (jeu fermé ou bouton « Fin de session »)",hook_test:"Tester",hook_ok:"Webhook envoyé.",hook_save_first:"Enregistre d'abord les réglages.",upd_title:"Mises à jour",upd_check:"Vérifier automatiquement les nouvelles versions",upd_auto:"Installer les mises à jour automatiquement (hors session de jeu)",upd_now:"Vérifier maintenant",upd_checking:"Vérification…",upd_uptodate:"SimLauncher est à jour (v{v}).",upd_err:"Vérification impossible : {e}",upd_banner:"La version {v} de SimLauncher est disponible.",upd_banner_plain:"La version {v} est disponible.",upd_install:"Mettre à jour",upd_notes:"Voir les nouveautés",upd_installing:"Installation de la version {v}… SimLauncher va redémarrer.",f_hide_name:"Masquer le nom",f_image:"Image de la carte",f_image_hint:"Photo .jpg, .png ou .webp (facultatif)",f_image_clear:"Retirer",tab_games:"Jeux",tab_settings:"Réglages",tab_deck:"Stream Deck",quit:"Quitter",quit_tray:"Quitter SimLauncher",
+fr:{sv_general:"Général",sv_games:"Jeux",sv_apps:"Logiciels",sv_profiles:"Profils",sv_integrations:"Intégrations",sv_updates:"Mises à jour",sv_hidden:"masqué",prof_title:"Profils de séquence",prof_hint:"Un profil choisit quels logiciels démarrent, par exemple « VR » avec le casque et « Écran » sans. Chaque carte affiche alors un bouton par profil ; un clic ailleurs sur la carte utilise le premier. Sans profil, chaque jeu démarre tous ses logiciels.",prof_add:"Ajouter un profil",prof_new:"Nouveau profil",prof_apps:"Logiciels autorisés :",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"aujourd'hui",pt_yesterday:"hier",pt_days:"il y a {n} j",end_btn:"Fin de session",end_confirm:"Fermer le jeu et tous les logiciels ?",steam_scan:"Détecter mes jeux Steam",steam_all:"Tous les jeux, pas seulement la course",steam_scanning:"Recherche…",steam_found:"{n} jeu(x) à ajouter.",steam_none:"Aucun jeu trouvé.",steam_already:"Déjà dans SimLauncher",steam_add:"Ajouter la sélection",steam_added:"{n} jeu(x) ajouté(s), avec leur image Steam.",steam_dirty:"Tes modifications non enregistrées seront perdues. Continuer ?",steam_img:"Image Steam",hook_title:"Home Assistant et webhooks",hook_hint:"SimLauncher envoie une requête POST (JSON : <code>event</code>, <code>game_id</code>, <code>game</code>) au début et à la fin de chaque session. Avec Home Assistant, crée une automatisation déclenchée par un <b>webhook</b> et colle son URL ici.",hook_start:"Début de session",hook_end:"Fin de session (jeu fermé ou bouton « Fin de session »)",hook_test:"Tester",hook_ok:"Webhook envoyé.",hook_save_first:"Enregistre d'abord les réglages.",upd_title:"Mises à jour",upd_check:"Vérifier automatiquement les nouvelles versions",upd_auto:"Installer les mises à jour automatiquement (hors session de jeu)",upd_now:"Vérifier maintenant",upd_checking:"Vérification…",upd_uptodate:"SimLauncher est à jour (v{v}).",upd_err:"Vérification impossible : {e}",upd_banner:"La version {v} de SimLauncher est disponible.",upd_banner_plain:"La version {v} est disponible.",upd_install:"Mettre à jour",upd_notes:"Voir les nouveautés",upd_installing:"Installation de la version {v}… SimLauncher va redémarrer.",f_hide_name:"Masquer le nom",f_image:"Image de la carte",f_image_hint:"Photo .jpg, .png ou .webp (facultatif)",f_image_clear:"Retirer",tab_games:"Jeux",tab_settings:"Réglages",tab_deck:"Stream Deck",quit:"Quitter",quit_tray:"Quitter SimLauncher",
 quit_title:"Arrête le lanceur (les jeux et logiciels restent ouverts)",quit_tray_title:"Arrête le lanceur et retire son icône (les jeux et logiciels restent ouverts)",
 apps_title:"Logiciels",log:"Journal",idle:"Choisis un jeu pour lancer la séquence.",stopped_msg:"Lanceur arrêté. Relance SimLauncher.",
 running:"En cours",apps_one:"1 logiciel avant",apps_many:"{n} logiciels avant",launch:"Lancer",no_games:"Aucun jeu affiché. Ajoute-en dans Réglages.",
 exe_missing:"Exécutable introuvable",close:"Fermer",start:"Démarrer",
-seq_title:"Séquence",seq_hint:"Les logiciels se lancent dans l'ordre de la liste ci-dessous, puis le jeu après la pause.",
+seq_title:"Séquence",seq_hint:"Les logiciels se lancent dans l'ordre de l'onglet Logiciels, puis le jeu après la pause.",
 pause:"Pause avant le jeu (s)",close_on_exit:"Fermer les logiciels cochés « fermer après » quand le jeu se termine",port:"Port de l'interface",
 autostart:"Démarrer avec Windows, en icône près de l'horloge",auto_on:"Activé",auto_off:"Désactivé",
 apps_edit_title:"Logiciels compagnons",apps_hint:"Le nom du processus sert à savoir si le logiciel tourne déjà. Il apparaît dans le Gestionnaire des tâches, onglet Détails.",
@@ -269,12 +313,12 @@ deck_title:"Boutons Stream Deck",deck_1:"Dans le logiciel Stream Deck, glisse l'
 deck_2:"Colle la commande du jeu dans le champ <b>Application/Fichier</b>, guillemets compris.",
 deck_3:"Appuie sur la touche : la séquence se lance sans ouvrir de fenêtre. Un message s'affiche seulement en cas de problème.",
 copy:"Copier",copied:"Copié",quit_done:"SimLauncher est arrêté. Tu peux fermer cette fenêtre.",error_n:"Erreur {n}"},
-en:{prof_title:"Sequence profiles",prof_hint:"A profile picks which apps start, for example “VR” with the headset and “Flat” without it. Each card then shows one button per profile; clicking elsewhere on the card uses the first one. Without profiles, every game starts all its apps.",prof_add:"Add a profile",prof_new:"New profile",prof_apps:"Allowed apps:",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"today",pt_yesterday:"yesterday",pt_days:"{n} days ago",end_btn:"End session",end_confirm:"Close the game and every app?",steam_scan:"Find my Steam games",steam_all:"All games, not only racing",steam_scanning:"Searching…",steam_found:"{n} game(s) to add.",steam_none:"No game found.",steam_already:"Already in SimLauncher",steam_add:"Add selected",steam_added:"{n} game(s) added, with their Steam picture.",steam_dirty:"Your unsaved changes will be lost. Continue?",steam_img:"Steam picture",hook_title:"Home Assistant and webhooks",hook_hint:"SimLauncher sends a POST request (JSON: <code>event</code>, <code>game_id</code>, <code>game</code>) at the start and end of every session. With Home Assistant, create an automation triggered by a <b>webhook</b> and paste its URL here.",hook_start:"Session start",hook_end:"Session end (game closed or “End session” button)",hook_test:"Test",hook_ok:"Webhook sent.",hook_save_first:"Save the settings first.",upd_title:"Updates",upd_check:"Check for new versions automatically",upd_auto:"Install updates automatically (never during a session)",upd_now:"Check now",upd_checking:"Checking…",upd_uptodate:"SimLauncher is up to date (v{v}).",upd_err:"Could not check: {e}",upd_banner:"SimLauncher {v} is available.",upd_banner_plain:"Version {v} is available.",upd_install:"Update now",upd_notes:"What's new",upd_installing:"Installing version {v}… SimLauncher will restart.",f_hide_name:"Hide the name",f_image:"Card image",f_image_hint:"A .jpg, .png or .webp photo (optional)",f_image_clear:"Remove",tab_games:"Games",tab_settings:"Settings",tab_deck:"Stream Deck",quit:"Quit",quit_tray:"Quit SimLauncher",
+en:{sv_general:"General",sv_games:"Games",sv_apps:"Apps",sv_profiles:"Profiles",sv_integrations:"Integrations",sv_updates:"Updates",sv_hidden:"hidden",prof_title:"Sequence profiles",prof_hint:"A profile picks which apps start, for example “VR” with the headset and “Flat” without it. Each card then shows one button per profile; clicking elsewhere on the card uses the first one. Without profiles, every game starts all its apps.",prof_add:"Add a profile",prof_new:"New profile",prof_apps:"Allowed apps:",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"today",pt_yesterday:"yesterday",pt_days:"{n} days ago",end_btn:"End session",end_confirm:"Close the game and every app?",steam_scan:"Find my Steam games",steam_all:"All games, not only racing",steam_scanning:"Searching…",steam_found:"{n} game(s) to add.",steam_none:"No game found.",steam_already:"Already in SimLauncher",steam_add:"Add selected",steam_added:"{n} game(s) added, with their Steam picture.",steam_dirty:"Your unsaved changes will be lost. Continue?",steam_img:"Steam picture",hook_title:"Home Assistant and webhooks",hook_hint:"SimLauncher sends a POST request (JSON: <code>event</code>, <code>game_id</code>, <code>game</code>) at the start and end of every session. With Home Assistant, create an automation triggered by a <b>webhook</b> and paste its URL here.",hook_start:"Session start",hook_end:"Session end (game closed or “End session” button)",hook_test:"Test",hook_ok:"Webhook sent.",hook_save_first:"Save the settings first.",upd_title:"Updates",upd_check:"Check for new versions automatically",upd_auto:"Install updates automatically (never during a session)",upd_now:"Check now",upd_checking:"Checking…",upd_uptodate:"SimLauncher is up to date (v{v}).",upd_err:"Could not check: {e}",upd_banner:"SimLauncher {v} is available.",upd_banner_plain:"Version {v} is available.",upd_install:"Update now",upd_notes:"What's new",upd_installing:"Installing version {v}… SimLauncher will restart.",f_hide_name:"Hide the name",f_image:"Card image",f_image_hint:"A .jpg, .png or .webp photo (optional)",f_image_clear:"Remove",tab_games:"Games",tab_settings:"Settings",tab_deck:"Stream Deck",quit:"Quit",quit_tray:"Quit SimLauncher",
 quit_title:"Stops the launcher (games and apps stay open)",quit_tray_title:"Stops the launcher and removes its icon (games and apps stay open)",
 apps_title:"Apps",log:"Log",idle:"Pick a game to start the sequence.",stopped_msg:"Launcher stopped. Start SimLauncher again.",
 running:"Running",apps_one:"1 app first",apps_many:"{n} apps first",launch:"Launch",no_games:"No games shown. Add some in Settings.",
 exe_missing:"Executable not found",close:"Close",start:"Start",
-seq_title:"Sequence",seq_hint:"Apps start in the order of the list below, then the game after the pause.",
+seq_title:"Sequence",seq_hint:"Apps start in the order of the Apps tab, then the game after the pause.",
 pause:"Pause before the game (s)",close_on_exit:"Close the apps marked “close after” when the game exits",port:"Interface port",
 autostart:"Start with Windows, as an icon next to the clock",auto_on:"On",auto_off:"Off",
 apps_edit_title:"Companion apps",apps_hint:"The process name tells whether the app is already running. You can find it in Task Manager, Details tab.",
@@ -288,12 +332,12 @@ deck_title:"Stream Deck keys",deck_1:"In the Stream Deck app, drag the <b>System
 deck_2:"Paste the game's command into the <b>App/File</b> field, quotes included.",
 deck_3:"Press the key: the sequence runs without opening a window. A message appears only if something goes wrong.",
 copy:"Copy",copied:"Copied",quit_done:"SimLauncher has stopped. You can close this window.",error_n:"Error {n}"},
-pt:{prof_title:"Perfis de sequência",prof_hint:"Um perfil escolhe quais programas iniciam, por exemplo “VR” com o headset e “Tela” sem ele. Cada cartão mostra um botão por perfil; clicar em outro lugar do cartão usa o primeiro. Sem perfis, cada jogo inicia todos os seus programas.",prof_add:"Adicionar um perfil",prof_new:"Novo perfil",prof_apps:"Programas permitidos:",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"hoje",pt_yesterday:"ontem",pt_days:"há {n} dias",end_btn:"Encerrar sessão",end_confirm:"Fechar o jogo e todos os programas?",steam_scan:"Encontrar meus jogos Steam",steam_all:"Todos os jogos, não só de corrida",steam_scanning:"Procurando…",steam_found:"{n} jogo(s) para adicionar.",steam_none:"Nenhum jogo encontrado.",steam_already:"Já está no SimLauncher",steam_add:"Adicionar seleção",steam_added:"{n} jogo(s) adicionado(s), com a imagem do Steam.",steam_dirty:"As alterações não salvas serão perdidas. Continuar?",steam_img:"Imagem Steam",hook_title:"Home Assistant e webhooks",hook_hint:"O SimLauncher envia uma requisição POST (JSON: <code>event</code>, <code>game_id</code>, <code>game</code>) no início e no fim de cada sessão. No Home Assistant, crie uma automação acionada por <b>webhook</b> e cole a URL aqui.",hook_start:"Início da sessão",hook_end:"Fim da sessão (jogo fechado ou botão “Encerrar sessão”)",hook_test:"Testar",hook_ok:"Webhook enviado.",hook_save_first:"Salve as configurações primeiro.",upd_title:"Atualizações",upd_check:"Verificar novas versões automaticamente",upd_auto:"Instalar atualizações automaticamente (nunca durante uma sessão)",upd_now:"Verificar agora",upd_checking:"Verificando…",upd_uptodate:"O SimLauncher está atualizado (v{v}).",upd_err:"Não foi possível verificar: {e}",upd_banner:"O SimLauncher {v} está disponível.",upd_banner_plain:"A versão {v} está disponível.",upd_install:"Atualizar",upd_notes:"Novidades",upd_installing:"Instalando a versão {v}… O SimLauncher será reiniciado.",f_hide_name:"Ocultar o nome",f_image:"Imagem do cartão",f_image_hint:"Foto .jpg, .png ou .webp (opcional)",f_image_clear:"Remover",tab_games:"Jogos",tab_settings:"Configurações",tab_deck:"Stream Deck",quit:"Sair",quit_tray:"Sair do SimLauncher",
+pt:{sv_general:"Geral",sv_games:"Jogos",sv_apps:"Programas",sv_profiles:"Perfis",sv_integrations:"Integrações",sv_updates:"Atualizações",sv_hidden:"oculto",prof_title:"Perfis de sequência",prof_hint:"Um perfil escolhe quais programas iniciam, por exemplo “VR” com o headset e “Tela” sem ele. Cada cartão mostra um botão por perfil; clicar em outro lugar do cartão usa o primeiro. Sem perfis, cada jogo inicia todos os seus programas.",prof_add:"Adicionar um perfil",prof_new:"Novo perfil",prof_apps:"Programas permitidos:",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"hoje",pt_yesterday:"ontem",pt_days:"há {n} dias",end_btn:"Encerrar sessão",end_confirm:"Fechar o jogo e todos os programas?",steam_scan:"Encontrar meus jogos Steam",steam_all:"Todos os jogos, não só de corrida",steam_scanning:"Procurando…",steam_found:"{n} jogo(s) para adicionar.",steam_none:"Nenhum jogo encontrado.",steam_already:"Já está no SimLauncher",steam_add:"Adicionar seleção",steam_added:"{n} jogo(s) adicionado(s), com a imagem do Steam.",steam_dirty:"As alterações não salvas serão perdidas. Continuar?",steam_img:"Imagem Steam",hook_title:"Home Assistant e webhooks",hook_hint:"O SimLauncher envia uma requisição POST (JSON: <code>event</code>, <code>game_id</code>, <code>game</code>) no início e no fim de cada sessão. No Home Assistant, crie uma automação acionada por <b>webhook</b> e cole a URL aqui.",hook_start:"Início da sessão",hook_end:"Fim da sessão (jogo fechado ou botão “Encerrar sessão”)",hook_test:"Testar",hook_ok:"Webhook enviado.",hook_save_first:"Salve as configurações primeiro.",upd_title:"Atualizações",upd_check:"Verificar novas versões automaticamente",upd_auto:"Instalar atualizações automaticamente (nunca durante uma sessão)",upd_now:"Verificar agora",upd_checking:"Verificando…",upd_uptodate:"O SimLauncher está atualizado (v{v}).",upd_err:"Não foi possível verificar: {e}",upd_banner:"O SimLauncher {v} está disponível.",upd_banner_plain:"A versão {v} está disponível.",upd_install:"Atualizar",upd_notes:"Novidades",upd_installing:"Instalando a versão {v}… O SimLauncher será reiniciado.",f_hide_name:"Ocultar o nome",f_image:"Imagem do cartão",f_image_hint:"Foto .jpg, .png ou .webp (opcional)",f_image_clear:"Remover",tab_games:"Jogos",tab_settings:"Configurações",tab_deck:"Stream Deck",quit:"Sair",quit_tray:"Sair do SimLauncher",
 quit_title:"Encerra o iniciador (jogos e programas continuam abertos)",quit_tray_title:"Encerra o iniciador e remove o ícone (jogos e programas continuam abertos)",
 apps_title:"Programas",log:"Registro",idle:"Escolha um jogo para iniciar a sequência.",stopped_msg:"Iniciador encerrado. Abra o SimLauncher de novo.",
 running:"Em execução",apps_one:"1 programa antes",apps_many:"{n} programas antes",launch:"Iniciar",no_games:"Nenhum jogo exibido. Adicione em Configurações.",
 exe_missing:"Executável não encontrado",close:"Fechar",start:"Iniciar",
-seq_title:"Sequência",seq_hint:"Os programas iniciam na ordem da lista abaixo e, depois da pausa, o jogo.",
+seq_title:"Sequência",seq_hint:"Os programas iniciam na ordem da aba Programas e, depois da pausa, o jogo.",
 pause:"Pausa antes do jogo (s)",close_on_exit:"Fechar os programas marcados “fechar depois” quando o jogo terminar",port:"Porta da interface",
 autostart:"Iniciar com o Windows, como ícone ao lado do relógio",auto_on:"Ativado",auto_off:"Desativado",
 apps_edit_title:"Programas auxiliares",apps_hint:"O nome do processo indica se o programa já está em execução. Ele aparece no Gerenciador de Tarefas, aba Detalhes.",
@@ -307,12 +351,12 @@ deck_title:"Teclas do Stream Deck",deck_1:"No aplicativo Stream Deck, arraste a 
 deck_2:"Cole o comando do jogo no campo <b>Aplicativo/Arquivo</b>, com as aspas.",
 deck_3:"Pressione a tecla: a sequência roda sem abrir janela. Uma mensagem só aparece se algo der errado.",
 copy:"Copiar",copied:"Copiado",quit_done:"O SimLauncher foi encerrado. Você pode fechar esta janela.",error_n:"Erro {n}"},
-es:{prof_title:"Perfiles de secuencia",prof_hint:"Un perfil elige qué programas se inician, por ejemplo «VR» con el visor y «Pantalla» sin él. Cada tarjeta muestra un botón por perfil; hacer clic en otra parte de la tarjeta usa el primero. Sin perfiles, cada juego inicia todos sus programas.",prof_add:"Añadir un perfil",prof_new:"Nuevo perfil",prof_apps:"Programas permitidos:",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"hoy",pt_yesterday:"ayer",pt_days:"hace {n} días",end_btn:"Terminar sesión",end_confirm:"¿Cerrar el juego y todos los programas?",steam_scan:"Buscar mis juegos de Steam",steam_all:"Todos los juegos, no solo de carreras",steam_scanning:"Buscando…",steam_found:"{n} juego(s) para añadir.",steam_none:"No se encontró ningún juego.",steam_already:"Ya está en SimLauncher",steam_add:"Añadir selección",steam_added:"{n} juego(s) añadido(s), con su imagen de Steam.",steam_dirty:"Se perderán los cambios sin guardar. ¿Continuar?",steam_img:"Imagen de Steam",hook_title:"Home Assistant y webhooks",hook_hint:"SimLauncher envía una petición POST (JSON: <code>event</code>, <code>game_id</code>, <code>game</code>) al principio y al final de cada sesión. En Home Assistant, crea una automatización activada por <b>webhook</b> y pega aquí su URL.",hook_start:"Inicio de sesión",hook_end:"Fin de sesión (juego cerrado o botón «Terminar sesión»)",hook_test:"Probar",hook_ok:"Webhook enviado.",hook_save_first:"Guarda primero los ajustes.",upd_title:"Actualizaciones",upd_check:"Buscar nuevas versiones automáticamente",upd_auto:"Instalar actualizaciones automáticamente (nunca durante una sesión)",upd_now:"Buscar ahora",upd_checking:"Buscando…",upd_uptodate:"SimLauncher está actualizado (v{v}).",upd_err:"No se pudo comprobar: {e}",upd_banner:"SimLauncher {v} está disponible.",upd_banner_plain:"La versión {v} está disponible.",upd_install:"Actualizar",upd_notes:"Novedades",upd_installing:"Instalando la versión {v}… SimLauncher se reiniciará.",f_hide_name:"Ocultar el nombre",f_image:"Imagen de la tarjeta",f_image_hint:"Foto .jpg, .png o .webp (opcional)",f_image_clear:"Quitar",tab_games:"Juegos",tab_settings:"Ajustes",tab_deck:"Stream Deck",quit:"Salir",quit_tray:"Salir de SimLauncher",
+es:{sv_general:"General",sv_games:"Juegos",sv_apps:"Programas",sv_profiles:"Perfiles",sv_integrations:"Integraciones",sv_updates:"Actualizaciones",sv_hidden:"oculto",prof_title:"Perfiles de secuencia",prof_hint:"Un perfil elige qué programas se inician, por ejemplo «VR» con el visor y «Pantalla» sin él. Cada tarjeta muestra un botón por perfil; hacer clic en otra parte de la tarjeta usa el primero. Sin perfiles, cada juego inicia todos sus programas.",prof_add:"Añadir un perfil",prof_new:"Nuevo perfil",prof_apps:"Programas permitidos:",pt_h:"{h} h {m}",pt_m:"{m} min",pt_today:"hoy",pt_yesterday:"ayer",pt_days:"hace {n} días",end_btn:"Terminar sesión",end_confirm:"¿Cerrar el juego y todos los programas?",steam_scan:"Buscar mis juegos de Steam",steam_all:"Todos los juegos, no solo de carreras",steam_scanning:"Buscando…",steam_found:"{n} juego(s) para añadir.",steam_none:"No se encontró ningún juego.",steam_already:"Ya está en SimLauncher",steam_add:"Añadir selección",steam_added:"{n} juego(s) añadido(s), con su imagen de Steam.",steam_dirty:"Se perderán los cambios sin guardar. ¿Continuar?",steam_img:"Imagen de Steam",hook_title:"Home Assistant y webhooks",hook_hint:"SimLauncher envía una petición POST (JSON: <code>event</code>, <code>game_id</code>, <code>game</code>) al principio y al final de cada sesión. En Home Assistant, crea una automatización activada por <b>webhook</b> y pega aquí su URL.",hook_start:"Inicio de sesión",hook_end:"Fin de sesión (juego cerrado o botón «Terminar sesión»)",hook_test:"Probar",hook_ok:"Webhook enviado.",hook_save_first:"Guarda primero los ajustes.",upd_title:"Actualizaciones",upd_check:"Buscar nuevas versiones automáticamente",upd_auto:"Instalar actualizaciones automáticamente (nunca durante una sesión)",upd_now:"Buscar ahora",upd_checking:"Buscando…",upd_uptodate:"SimLauncher está actualizado (v{v}).",upd_err:"No se pudo comprobar: {e}",upd_banner:"SimLauncher {v} está disponible.",upd_banner_plain:"La versión {v} está disponible.",upd_install:"Actualizar",upd_notes:"Novedades",upd_installing:"Instalando la versión {v}… SimLauncher se reiniciará.",f_hide_name:"Ocultar el nombre",f_image:"Imagen de la tarjeta",f_image_hint:"Foto .jpg, .png o .webp (opcional)",f_image_clear:"Quitar",tab_games:"Juegos",tab_settings:"Ajustes",tab_deck:"Stream Deck",quit:"Salir",quit_tray:"Salir de SimLauncher",
 quit_title:"Detiene el lanzador (los juegos y aplicaciones siguen abiertos)",quit_tray_title:"Detiene el lanzador y quita su icono (los juegos y aplicaciones siguen abiertos)",
 apps_title:"Aplicaciones",log:"Registro",idle:"Elige un juego para iniciar la secuencia.",stopped_msg:"Lanzador detenido. Vuelve a abrir SimLauncher.",
 running:"En marcha",apps_one:"1 aplicación antes",apps_many:"{n} aplicaciones antes",launch:"Lanzar",no_games:"No hay juegos visibles. Añádelos en Ajustes.",
 exe_missing:"Ejecutable no encontrado",close:"Cerrar",start:"Iniciar",
-seq_title:"Secuencia",seq_hint:"Las aplicaciones se inician en el orden de la lista de abajo y, tras la pausa, el juego.",
+seq_title:"Secuencia",seq_hint:"Los programas se inician en el orden de la pestaña Programas y, tras la pausa, el juego.",
 pause:"Pausa antes del juego (s)",close_on_exit:"Cerrar las aplicaciones marcadas «cerrar después» cuando el juego termine",port:"Puerto de la interfaz",
 autostart:"Iniciar con Windows, como icono junto al reloj",auto_on:"Activado",auto_off:"Desactivado",
 apps_edit_title:"Aplicaciones complementarias",apps_hint:"El nombre del proceso indica si la aplicación ya está en marcha. Aparece en el Administrador de tareas, pestaña Detalles.",
@@ -326,12 +370,12 @@ deck_title:"Teclas de Stream Deck",deck_1:"En la aplicación Stream Deck, arrast
 deck_2:"Pega el comando del juego en el campo <b>Aplicación/Archivo</b>, con las comillas.",
 deck_3:"Pulsa la tecla: la secuencia se ejecuta sin abrir ventanas. Solo aparece un mensaje si algo falla.",
 copy:"Copiar",copied:"Copiado",quit_done:"SimLauncher se ha detenido. Puedes cerrar esta ventana.",error_n:"Error {n}"},
-zh:{prof_title:"启动配置",prof_hint:"配置决定启动哪些程序，例如带头显的“VR”和不带头显的“平面”。每张卡片会为每个配置显示一个按钮；点击卡片其他位置使用第一个配置。没有配置时，每个游戏启动其全部程序。",prof_add:"添加配置",prof_new:"新配置",prof_apps:"允许的程序：",pt_h:"{h} 小时 {m} 分",pt_m:"{m} 分钟",pt_today:"今天",pt_yesterday:"昨天",pt_days:"{n} 天前",end_btn:"结束会话",end_confirm:"关闭游戏和所有程序？",steam_scan:"查找我的 Steam 游戏",steam_all:"所有游戏，不只是赛车游戏",steam_scanning:"正在查找…",steam_found:"有 {n} 个游戏可添加。",steam_none:"未找到游戏。",steam_already:"已在 SimLauncher 中",steam_add:"添加所选",steam_added:"已添加 {n} 个游戏，并使用 Steam 图片。",steam_dirty:"未保存的更改将丢失。继续吗？",steam_img:"Steam 图片",hook_title:"Home Assistant 与 Webhook",hook_hint:"SimLauncher 会在每次会话开始和结束时发送 POST 请求（JSON：<code>event</code>、<code>game_id</code>、<code>game</code>）。在 Home Assistant 中创建由 <b>webhook</b> 触发的自动化，并将其 URL 粘贴到这里。",hook_start:"会话开始",hook_end:"会话结束（游戏关闭或点击“结束会话”）",hook_test:"测试",hook_ok:"Webhook 已发送。",hook_save_first:"请先保存设置。",upd_title:"更新",upd_check:"自动检查新版本",upd_auto:"自动安装更新（游戏进行中不会安装）",upd_now:"立即检查",upd_checking:"正在检查…",upd_uptodate:"SimLauncher 已是最新版本（v{v}）。",upd_err:"无法检查：{e}",upd_banner:"SimLauncher {v} 已发布。",upd_banner_plain:"版本 {v} 已发布。",upd_install:"立即更新",upd_notes:"更新内容",upd_installing:"正在安装版本 {v}… SimLauncher 将重新启动。",f_hide_name:"隐藏名称",f_image:"卡片图片",f_image_hint:"可选：.jpg、.png 或 .webp 照片",f_image_clear:"移除",tab_games:"游戏",tab_settings:"设置",tab_deck:"Stream Deck",quit:"退出",quit_tray:"退出 SimLauncher",
+zh:{sv_general:"常规",sv_games:"游戏",sv_apps:"程序",sv_profiles:"配置",sv_integrations:"集成",sv_updates:"更新",sv_hidden:"已隐藏",prof_title:"启动配置",prof_hint:"配置决定启动哪些程序，例如带头显的“VR”和不带头显的“平面”。每张卡片会为每个配置显示一个按钮；点击卡片其他位置使用第一个配置。没有配置时，每个游戏启动其全部程序。",prof_add:"添加配置",prof_new:"新配置",prof_apps:"允许的程序：",pt_h:"{h} 小时 {m} 分",pt_m:"{m} 分钟",pt_today:"今天",pt_yesterday:"昨天",pt_days:"{n} 天前",end_btn:"结束会话",end_confirm:"关闭游戏和所有程序？",steam_scan:"查找我的 Steam 游戏",steam_all:"所有游戏，不只是赛车游戏",steam_scanning:"正在查找…",steam_found:"有 {n} 个游戏可添加。",steam_none:"未找到游戏。",steam_already:"已在 SimLauncher 中",steam_add:"添加所选",steam_added:"已添加 {n} 个游戏，并使用 Steam 图片。",steam_dirty:"未保存的更改将丢失。继续吗？",steam_img:"Steam 图片",hook_title:"Home Assistant 与 Webhook",hook_hint:"SimLauncher 会在每次会话开始和结束时发送 POST 请求（JSON：<code>event</code>、<code>game_id</code>、<code>game</code>）。在 Home Assistant 中创建由 <b>webhook</b> 触发的自动化，并将其 URL 粘贴到这里。",hook_start:"会话开始",hook_end:"会话结束（游戏关闭或点击“结束会话”）",hook_test:"测试",hook_ok:"Webhook 已发送。",hook_save_first:"请先保存设置。",upd_title:"更新",upd_check:"自动检查新版本",upd_auto:"自动安装更新（游戏进行中不会安装）",upd_now:"立即检查",upd_checking:"正在检查…",upd_uptodate:"SimLauncher 已是最新版本（v{v}）。",upd_err:"无法检查：{e}",upd_banner:"SimLauncher {v} 已发布。",upd_banner_plain:"版本 {v} 已发布。",upd_install:"立即更新",upd_notes:"更新内容",upd_installing:"正在安装版本 {v}… SimLauncher 将重新启动。",f_hide_name:"隐藏名称",f_image:"卡片图片",f_image_hint:"可选：.jpg、.png 或 .webp 照片",f_image_clear:"移除",tab_games:"游戏",tab_settings:"设置",tab_deck:"Stream Deck",quit:"退出",quit_tray:"退出 SimLauncher",
 quit_title:"停止启动器（游戏和软件保持打开）",quit_tray_title:"停止启动器并移除图标（游戏和软件保持打开）",
 apps_title:"软件",log:"日志",idle:"选择一个游戏开始启动流程。",stopped_msg:"启动器已停止。请重新打开 SimLauncher。",
 running:"运行中",apps_one:"先启动 1 个软件",apps_many:"先启动 {n} 个软件",launch:"启动",no_games:"没有显示的游戏。请在设置中添加。",
 exe_missing:"找不到可执行文件",close:"关闭",start:"启动",
-seq_title:"启动流程",seq_hint:"软件按下方列表顺序启动，等待之后再启动游戏。",
+seq_title:"启动流程",seq_hint:"程序按“程序”页中的顺序启动，等待之后再启动游戏。",
 pause:"启动游戏前等待（秒）",close_on_exit:"游戏退出时关闭标记为“之后关闭”的软件",port:"界面端口",
 autostart:"随 Windows 启动，显示为时钟旁的图标",auto_on:"已启用",auto_off:"已停用",
 apps_edit_title:"配套软件",apps_hint:"进程名用于判断软件是否已在运行，可在任务管理器的“详细信息”选项卡中找到。",
@@ -463,7 +507,44 @@ function renderEditor(){
       <div class="span6 field">${t('f_image')}<span class="path">${g.image?`<img class="thumb" alt="" src="/api/image/${encodeURIComponent(state.config.games.some(x=>x.id===g.id&&x.image===g.image)?g.id:'')}?v=${encodeURIComponent(imgVer(g.image))}" onerror="this.style.visibility='hidden'">`:''}<input type="text" data-k="image" value="${esc(g.image||'')}" placeholder="${t('f_image_hint')}"><button class="mini" data-pick="image" type="button">${t('f_browse')}</button>${g.steamAppId?`<button class="mini" data-steamimg="1" type="button">${t('steam_img')}</button>`:''}${g.image?`<button class="mini" data-clearimg="1" type="button">${t('f_image_clear')}</button>`:''}<label class="inline" style="white-space:nowrap"><input type="checkbox" data-k="hideName" ${g.hideName?'checked':''} ${g.image?'':'disabled'}> ${t('f_hide_name')}</label></span></div>
       <div class="checks span6">${t('f_before')} ${draft.apps.map(a=>`<label class="inline"><input type="checkbox" data-app="${esc(a.id)}" ${g.apps.includes(a.id)?'checked':''}> ${esc(a.name)}</label>`).join('')}</div>
     </div>`).join('');
+  collapse('#ed-apps','app',draft.apps,a=>{
+    const miss=(state.apps.find(x=>x.id===a.id)||{}).found===false;
+    return `<span class="sname">${esc(a.name)}</span><span class="smeta">${esc(a.process||'')}${miss?` · <span class="warn">${t('exe_missing')}</span>`:''}</span>`;
+  });
+  collapse('#ed-games','game',draft.games,g=>{
+    const pic=g.image&&state.config.games.some(x=>x.id===g.id&&x.image===g.image);
+    const how=g.steamAppId?`Steam ${esc(g.steamAppId)}`:esc((g.exePath||'').split('\\').pop()||'—');
+    return `<span class="sw" style="background:${esc(g.color||'#888')}"></span>${pic?`<img class="sthumb" alt="" src="/api/image/${encodeURIComponent(g.id)}?v=${encodeURIComponent(imgVer(g.image))}">`:''}<span class="sname">${esc(g.name)}</span><span class="smeta">${how} · ${g.apps.length===1?t('apps_one'):t('apps_many',{n:g.apps.length})}${g.enabled?'':' · '+t('sv_hidden')}</span>`;
+  });
+  renderSubnavCounts();
 }
+
+// Lignes repliables : un résumé cliquable, le détail s'ouvre au clic. L'état ouvert survit aux rafraîchissements.
+const openItems=new Set();
+function collapse(sel,kind,list,sum){
+  document.querySelectorAll(sel+' > .row[data-i]').forEach(row=>{
+    const i=+row.dataset.i, key=kind+':'+i, d=document.createElement("details");
+    d.className='item'; d.open=openItems.has(key);
+    d.innerHTML=`<summary>${sum(list[i])}</summary>`;
+    row.replaceWith(d); d.appendChild(row);
+    d.addEventListener('toggle',()=>d.open?openItems.add(key):openItems.delete(key));
+  });
+}
+function renderSubnavCounts(){
+  const n={games:draft.games.length,apps:draft.apps.length,profiles:draft.profiles.length};
+  document.querySelectorAll('.subnav button').forEach(b=>{
+    const k=b.dataset.sv; b.textContent=t("sv_"+k);
+    if(n[k]!==undefined){ const c=document.createElement("span"); c.className='count'; c.textContent=n[k]; b.appendChild(c); }
+  });
+}
+function showPane(k){
+  if(!document.querySelector(`.pane[data-pane="${k}"]`)) k='general';
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.pane===k));
+  document.querySelectorAll('.subnav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.sv===k));
+  try{ localStorage.setItem('sl.pane',k); }catch(e){}
+}
+document.querySelectorAll('.subnav button').forEach(b=>b.onclick=()=>showPane(b.dataset.sv));
+(()=>{ let k='general'; try{ k=localStorage.getItem('sl.pane')||k; }catch(e){} showPane(k); })();
 
 function listOf(row){ return row.classList.contains('app')?draft.apps:row.classList.contains('prof')?draft.profiles:draft.games; }
 
@@ -516,8 +597,8 @@ function bindEditor(){
     }
   });
   $('#add-prof').onclick=()=>{ const n=draft.profiles.length+1; draft.profiles.push({id:'profile'+n,name:t('prof_new'),apps:draft.apps.map(a=>a.id)}); mark(); renderEditor(); };
-  $('#add-app').onclick=()=>{ const n=draft.apps.length+1; draft.apps.push({id:'app'+n,name:t('new_app'),path:'',args:'',process:'',delayAfter:2,closeOnExit:false}); mark(); renderEditor(); };
-  $('#add-game').onclick=()=>{ const n=draft.games.length+1; draft.games.push({id:'game'+n,name:t('new_game'),enabled:true,steamAppId:'',exePath:'',exeArgs:'',process:'',apps:draft.apps.map(a=>a.id),color:'#888888'}); mark(); renderEditor(); };
+  $('#add-app').onclick=()=>{ const n=draft.apps.length+1; openItems.add('app:'+(n-1)); draft.apps.push({id:'app'+n,name:t('new_app'),path:'',args:'',process:'',delayAfter:2,closeOnExit:false}); mark(); renderEditor(); };
+  $('#add-game').onclick=()=>{ const n=draft.games.length+1; openItems.add('game:'+(n-1)); draft.games.push({id:'game'+n,name:t('new_game'),enabled:true,steamAppId:'',exePath:'',exeArgs:'',process:'',apps:draft.apps.map(a=>a.id),color:'#888888'}); mark(); renderEditor(); };
   $('#save').onclick=async()=>{
     const order=draft.apps.map(a=>a.id); draft.games.forEach(g=>g.apps.sort((a,b)=>order.indexOf(a)-order.indexOf(b)));
     draft.settings.language=state.config.settings.language;

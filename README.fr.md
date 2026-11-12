@@ -72,14 +72,16 @@ La configuration par défaut vise un rig Pimax + MOZA + SimHub + Crew Chief avec
 
 ## Réglages
 
+Les réglages sont rangés en onglets à gauche. *Enregistrer* applique en une fois les modifications de tous les onglets.
+
 | Section | Ce que tu règles |
 |---|---|
-| **Séquence** | Pause avant le jeu, fermeture automatique des logiciels à la fin du jeu, démarrage avec Windows, port de l'interface. |
+| **Général** | Pause avant le jeu, fermeture automatique des logiciels à la fin du jeu, démarrage avec Windows, port de l'interface. |
+| **Jeux** | *Détecter mes jeux Steam*, puis une ligne par jeu (clic pour la déplier) : nom, identifiant, AppID Steam ou exécutable, arguments, processus, couleur, image de la carte (*Parcourir* ou *Image Steam*), *Masquer le nom*, logiciels à démarrer avant. |
+| **Logiciels** | Une ligne par logiciel compagnon : nom, chemin, arguments, processus, pause après le démarrage, *Fermer après* (fermé à la fin du jeu). L'ordre de la liste est l'ordre de démarrage. |
+| **Profils** | Nom, identifiant et logiciels autorisés dans chaque profil. Un jeu ne démarre que les logiciels qu'il a *et* que le profil autorise. |
+| **Intégrations** | Home Assistant et webhooks : deux adresses appelées au début et à la fin d'une session, chacune avec un bouton *Tester*. Voir [plus bas](#home-assistant-et-webhooks). |
 | **Mises à jour** | Vérifier automatiquement les nouvelles versions (activé par défaut), les installer automatiquement (désactivé par défaut), *Vérifier maintenant*. |
-| **Home Assistant et webhooks** | Deux adresses appelées au début et à la fin d'une session, chacune avec un bouton *Tester*. Voir [plus bas](#home-assistant-et-webhooks). |
-| **Profils de séquence** | Nom, identifiant et logiciels autorisés dans chaque profil. Un jeu ne démarre que les logiciels qu'il a *et* que le profil autorise. |
-| **Logiciels compagnons** | Nom, chemin, arguments, processus, pause après le démarrage, *Fermer après* (fermé à la fin du jeu). L'ordre de la liste est l'ordre de démarrage. |
-| **Jeux** | *Détecter mes jeux Steam*, puis pour chaque jeu : nom, identifiant, AppID Steam ou exécutable, arguments, processus, couleur, image de la carte (*Parcourir* ou *Image Steam*), *Masquer le nom*, logiciels à démarrer avant. |
 
 **Les noms de processus** (par exemple `AMS2AVX.exe`) permettent à SimLauncher de savoir si un programme tourne déjà et de le fermer à la fin. Le nom exact se trouve dans le Gestionnaire des tâches › Détails.
 
@@ -232,7 +234,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Version | Changements |
 |---|---|
-| 1.5.1 | Message clair quand un logiciel ne peut pas être fermé parce qu'il tourne en administrateur. |
+| 1.5.1 | Réglages rangés en onglets avec des lignes repliables ; message clair quand un logiciel ne peut pas être fermé parce qu'il tourne en administrateur. |
 | 1.5.0 | Profils de séquence (cartes, icône, `--profile`, Stream Deck, MCP) et temps de jeu par jeu. |
 | 1.4.1 | Les mises à jour fonctionnent même si le serveur MCP de Claude Desktop utilise encore l'ancien exe. |
 | 1.4.0 | Détection des jeux Steam avec images, *Fin de session* (bouton, icône, `--end`, MCP), webhooks Home Assistant, outils MCP `end_session`, `scan_steam_games`, `import_steam_games`. |
