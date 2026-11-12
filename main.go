@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const version = "1.3.0"
+const version = "1.4.0"
 
 func main() {
 	gameID := flag.String("game", "", "lance le jeu indiqué (ex. ams2) sans interface — pour le Stream Deck")
@@ -18,6 +18,7 @@ func main() {
 	mcp := flag.Bool("mcp", false, "serveur MCP sur stdio (pour Claude Desktop et autres assistants IA)")
 	tray := flag.Bool("tray", false, "démarre en icône de notification, sans fenêtre (démarrage avec Windows)")
 	flag.BoolVar(&justUpdated, "updated", false, "usage interne : relancé après une mise à jour")
+	end := flag.Bool("end", false, "fin de session : ferme le jeu et tous les logiciels compagnons — pour le Stream Deck")
 	flag.Parse()
 
 	setupLog()
@@ -32,6 +33,18 @@ func main() {
 		if err := runMCP(os.Stdin, os.Stdout); err != nil {
 			log.Print(err)
 			os.Exit(1)
+		}
+	case *end:
+		// Si SimLauncher tourne déjà, c'est lui qui ferme (et qui envoie le webhook une seule fois).
+		r := remoteBackend{base: fmt.Sprintf("http://127.0.0.1:%d", c.Settings.UIPort)}
+		if _, err := r.state(); err == nil {
+			if err := r.do("POST", "/api/end", struct{}{}, nil); err == nil {
+				return
+			}
+		}
+		if _, err := endSession(c); err != nil {
+			messageBox("SimLauncher", err.Error())
+			os.Exit(3)
 		}
 	case *list:
 		for _, g := range c.Games {

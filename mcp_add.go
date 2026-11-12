@@ -47,6 +47,85 @@ func init() {
 	)
 }
 
+func init() {
+	mcpTools = append(mcpTools,
+		mcpTool{"end_session", "End the sim racing session: close the running game and every companion app, then call the end-of-session webhook if one is set.", noArgs()},
+		mcpTool{"scan_steam_games", "List the games installed in Steam on this PC. By default only known sim racing games; set all to true for every installed game. Shows which ones are already in SimLauncher.", map[string]any{
+			"type": "object", "properties": map[string]any{"all": map[string]any{"type": "boolean", "description": "Include every installed Steam game, not only racing games"}}, "additionalProperties": false}},
+		mcpTool{"import_steam_games", "Add installed Steam games to SimLauncher with their Steam picture, process name and every companion app. Without app_ids, adds every racing game found that is not configured yet.", map[string]any{
+			"type": "object", "properties": map[string]any{"app_ids": map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "Steam AppIDs from scan_steam_games"}}, "additionalProperties": false}},
+	)
+}
+
+func mcpEndSession(c Config) (string, error) {
+	r := remoteBackend{base: fmt.Sprintf("http://127.0.0.1:%d", c.Settings.UIPort)}
+	if _, err := r.state(); err == nil {
+		var out struct {
+			Closed []string `json:"closed"`
+		}
+		if err := r.do("POST", "/api/end", struct{}{}, &out); err != nil {
+			return "", err
+		}
+		return endText(out.Closed), nil
+	}
+	closed, err := endSession(c)
+	return endText(closed), err
+}
+
+func endText(closed []string) string {
+	if len(closed) == 0 {
+		return "Nothing was running."
+	}
+	return "Closed: " + strings.Join(closed, ", ")
+}
+
+func mcpScanSteam(c Config, args map[string]any) (string, error) {
+	all, _ := args["all"].(bool)
+	l, err := scanSteam(c, all)
+	if err != nil {
+		return "", err
+	}
+	if len(l) == 0 {
+		return "No matching Steam game installed.", nil
+	}
+	return steamSummary(l), nil
+}
+
+func mcpImportSteam(c Config, args map[string]any) (string, error) {
+	ids, given := argList(args, "app_ids")
+	if !given || len(ids) == 0 {
+		l, err := scanSteam(c, false)
+		if err != nil {
+			return "", err
+		}
+		for _, s := range l {
+			if !s.Configured {
+				ids = append(ids, s.AppID)
+			}
+		}
+	}
+	if len(ids) == 0 {
+		return "Every installed racing game is already in SimLauncher.", nil
+	}
+	added, err := importSteam(ids)
+	if err != nil {
+		return "", err
+	}
+	if len(added) == 0 {
+		return "Nothing new to add.", nil
+	}
+	var b strings.Builder
+	b.WriteString("Added:\n")
+	for _, g := range added {
+		pic := "no picture"
+		if g.Image != "" {
+			pic = "Steam picture"
+		}
+		fmt.Fprintf(&b, "%s — %s (%s, Stream Deck: --game %s)\n", g.ID, g.Name, pic, g.ID)
+	}
+	return b.String(), nil
+}
+
 func argStr(args map[string]any, k string) string {
 	switch v := args[k].(type) {
 	case string:

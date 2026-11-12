@@ -107,6 +107,7 @@ func launchGame(c Config, gameID string) error {
 	}()
 
 	setStep("%s", T("seq_start", g.Name))
+	fireStart(c, g)
 	started := 0
 	var errs []string
 	for _, id := range g.Apps {
@@ -173,7 +174,7 @@ func launchGame(c Config, gameID string) error {
 // maybeWatch surveille le jeu si l'option « fermer les logiciels » est active.
 func maybeWatch(c Config, gameID string) {
 	g, ok := c.game(gameID)
-	if !ok || !c.Settings.CloseAppsOnExit || g.Process == "" {
+	if !ok || g.Process == "" || (!c.Settings.CloseAppsOnExit && c.Settings.WebhookEnd == "") {
 		return
 	}
 	stMu.Lock()
@@ -206,6 +207,10 @@ func watchAndClose(c Config, g Game) {
 		}
 	}
 	setStep("%s", T("game_closed", g.Name))
+	defer fireEnd(c, g)
+	if !c.Settings.CloseAppsOnExit {
+		return
+	}
 	for _, id := range g.Apps {
 		a, ok := c.app(id)
 		if ok && a.CloseOnExit && a.Process != "" {

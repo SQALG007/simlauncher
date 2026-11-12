@@ -196,6 +196,20 @@ func callTool(name string, args map[string]any) map[string]any {
 	str := func(k string) string { v, _ := args[k].(string); return strings.TrimSpace(v) }
 
 	switch name {
+	case "end_session", "scan_steam_games", "import_steam_games":
+		var text string
+		switch name {
+		case "end_session":
+			text, err = mcpEndSession(c)
+		case "scan_steam_games":
+			text, err = mcpScanSteam(c, args)
+		default:
+			text, err = mcpImportSteam(c, args)
+		}
+		if err != nil {
+			return toolText(err.Error(), true)
+		}
+		return toolText(text, false)
 	case "add_game", "add_app":
 		f := mcpAddGame
 		if name == "add_app" {

@@ -18,6 +18,9 @@ Une session de sim racing en VR, c'est souvent quatre ou cinq logiciels à ouvri
 - **Fermeture automatique (option)** : quand le jeu se termine, ferme les logiciels que tu as cochés (par exemple Crew Chief).
 - **Tes propres images de jeux** : choisis une image .jpg, .png ou .webp dans Réglages, elle devient le fond de la carte du jeu.
 - **Mises à jour intégrées** : SimLauncher vérifie les nouvelles versions sur GitHub et se met à jour en un clic, ou tout seul si tu l'autorises (jamais pendant une session). Le fichier téléchargé est vérifié avec l'empreinte SHA-256 de la release.
+- **Détection des jeux Steam** : *Réglages › Détecter mes jeux Steam* liste les jeux de course installés dans Steam et ajoute ceux que tu coches, avec leur image Steam, leur processus et les logiciels compagnons.
+- **Fin de session** : un bouton (ou une touche Stream Deck, ou le menu de l'icône) ferme le jeu et tous les logiciels.
+- **Home Assistant et webhooks** : une requête POST au début et à la fin de chaque session, pour allumer le cockpit ou lancer une scène.
 - **Prêt pour le Stream Deck** : chaque jeu a sa commande à coller dans une touche *Système › Ouvrir*. Des icônes de touches sont fournies dans `assets/streamdeck`.
 - **Icône près de l'horloge** : démarrage avec Windows en icône. Clic droit pour lancer un jeu, double-clic pour ouvrir l'interface.
 - **Serveur MCP** : un assistant IA (Claude Desktop et autres) peut lister et lancer tes jeux.
@@ -39,6 +42,7 @@ La configuration par défaut vise un setup Pimax + MOZA + SimHub + Crew Chief av
 | Double-clic sur `SimLauncher.exe` | Ouvre l'interface (fenêtre d'application Edge). Elle s'arrête à la fermeture de la fenêtre, sauf en mode icône. |
 | Réglages › *Démarrer avec Windows* | Démarre caché à l'ouverture de session, avec l'icône près de l'horloge (`--tray`). |
 | Stream Deck *Système › Ouvrir* avec `"C:\…\SimLauncher.exe" --game ams2` | Lance la séquence sans fenêtre. Un message n'apparaît qu'en cas de problème. |
+| Stream Deck *Système › Ouvrir* avec `"C:\…\SimLauncher.exe" --end` | Fin de session : ferme le jeu et tous les logiciels. |
 
 ### Ligne de commande
 
@@ -56,7 +60,7 @@ Les identifiants sont visibles dans l'onglet **Stream Deck**.
 
 ## Serveur MCP (assistants IA)
 
-SimLauncher parle le [Model Context Protocol](https://modelcontextprotocol.io) sur stdio. Outils : `list_games`, `launch_game`, `list_apps`, `start_app`, `stop_app`, `get_status`, `add_game`, `add_app`. Tu peux par exemple demander « ajoute iRacing à SimLauncher » ou « ajoute OpenKneeboard avant AMS2 et LMU ». Si SimLauncher tourne déjà en icône, le serveur MCP lui transmet les commandes : l'interface et la surveillance de fin de jeu restent synchronisées.
+SimLauncher parle le [Model Context Protocol](https://modelcontextprotocol.io) sur stdio. Outils : `list_games`, `launch_game`, `list_apps`, `start_app`, `stop_app`, `get_status`, `add_game`, `add_app`, `end_session`, `scan_steam_games`, `import_steam_games`. Tu peux par exemple demander « ajoute iRacing à SimLauncher » ou « ajoute OpenKneeboard avant AMS2 et LMU ». Si SimLauncher tourne déjà en icône, le serveur MCP lui transmet les commandes : l'interface et la surveillance de fin de jeu restent synchronisées.
 
 Claude Desktop, `claude_desktop_config.json` :
 

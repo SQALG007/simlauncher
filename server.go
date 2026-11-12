@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net"
@@ -233,6 +234,98 @@ func newMux() *http.ServeMux {
 			return
 		}
 		writeJSON(w, 202, map[string]bool{"ok": true})
+	}))
+
+	mux.HandleFunc("/api/end", guard(func(w http.ResponseWriter, r *http.Request) {
+		c, err := loadConfig()
+		if err != nil {
+			writeErr(w, 500, err)
+			return
+		}
+		closed, err := endSession(c)
+		if err != nil {
+			writeErr(w, 500, err)
+			return
+		}
+		writeJSON(w, 200, map[string]any{"closed": closed})
+	}))
+	mux.HandleFunc("/api/steam/scan", guard(func(w http.ResponseWriter, r *http.Request) {
+		c, err := loadConfig()
+		if err != nil {
+			writeErr(w, 500, err)
+			return
+		}
+		l, err := scanSteam(c, r.URL.Query().Get("all") == "1")
+		if err != nil {
+			writeErr(w, 404, err)
+			return
+		}
+		writeJSON(w, 200, l)
+	}))
+	mux.HandleFunc("/api/steam/import", guard(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			AppIDs []string `json:"appIds"`
+		}
+		if err := json.NewDecoder(io.LimitReader(r.Body, 1<<16)).Decode(&body); err != nil {
+			writeErr(w, 400, err)
+			return
+		}
+		added, err := importSteam(body.AppIDs)
+		if err != nil {
+			writeErr(w, 400, err)
+			return
+		}
+		writeJSON(w, 200, added)
+	}))
+	// Copie l'image Steam d'un jeu dans le dossier de SimLauncher et renvoie son chemin (le brouillon des réglages l'utilise).
+	mux.HandleFunc("/api/steam/copycover", guard(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			AppID  string `json:"appId"`
+			GameID string `json:"gameId"`
+		}
+		if err := json.NewDecoder(io.LimitReader(r.Body, 1<<12)).Decode(&body); err != nil || !idRe.MatchString(body.GameID) || !digitsRe.MatchString(body.AppID) {
+			writeErr(w, 400, TE("forbidden"))
+			return
+		}
+		p, err := copyCover(body.AppID, body.GameID)
+		if err != nil {
+			writeErr(w, 404, err)
+			return
+		}
+		writeJSON(w, 200, map[string]string{"path": p})
+	}))
+	// Aperçu d'une image du cache Steam (liste de détection).
+	mux.HandleFunc("/api/steam/preview/", func(w http.ResponseWriter, r *http.Request) {
+		id := strings.TrimPrefix(r.URL.Path, "/api/steam/preview/")
+		p := ""
+		if digitsRe.MatchString(id) {
+			p = steamCover(steamRoot(), id)
+		}
+		if p == "" {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, p)
+	})
+	mux.HandleFunc("/api/webhook/test/", guard(func(w http.ResponseWriter, r *http.Request) {
+		c, err := loadConfig()
+		if err != nil {
+			writeErr(w, 500, err)
+			return
+		}
+		url, event := c.Settings.WebhookStart, "session_start"
+		if strings.HasSuffix(r.URL.Path, "/end") {
+			url, event = c.Settings.WebhookEnd, "session_end"
+		}
+		if url == "" {
+			writeErr(w, 400, TE("webhook_empty"))
+			return
+		}
+		if err := fireWebhook(url, event, Game{ID: "test", Name: "SimLauncher test"}); err != nil {
+			writeErr(w, 502, err)
+			return
+		}
+		writeJSON(w, 200, map[string]bool{"ok": true})
 	}))
 
 	mux.HandleFunc("/api/quit", guard(func(w http.ResponseWriter, r *http.Request) {

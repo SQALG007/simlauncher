@@ -43,6 +43,8 @@ type Settings struct {
 	Language        string `json:"language"`                // "auto", fr, en, pt, es, zh
 	NoUpdateCheck   bool   `json:"noUpdateCheck,omitempty"` // ne pas vérifier les nouvelles versions
 	AutoUpdate      bool   `json:"autoUpdate,omitempty"`    // installer les mises à jour sans demander
+	WebhookStart    string `json:"webhookStart,omitempty"`  // URL appelée (POST) au début d'une session
+	WebhookEnd      string `json:"webhookEnd,omitempty"`    // URL appelée à la fin (jeu fermé ou « Fin de session »)
 }
 
 type Config struct {
@@ -140,6 +142,11 @@ var idRe = regexp.MustCompile(`^[a-z0-9_-]{1,32}$`)
 
 // validate vérifie la cohérence d'une configuration envoyée par l'interface.
 func (c *Config) validate() error {
+	c.Settings.WebhookStart = strings.TrimSpace(c.Settings.WebhookStart)
+	c.Settings.WebhookEnd = strings.TrimSpace(c.Settings.WebhookEnd)
+	if !validWebhook(c.Settings.WebhookStart) || !validWebhook(c.Settings.WebhookEnd) {
+		return TE("v_webhook")
+	}
 	seen := map[string]bool{}
 	for i := range c.Apps {
 		a := &c.Apps[i]

@@ -65,6 +65,8 @@ var fakeAutostart bool
 
 func runTray(url string) error      { select {} }
 func trayNotify(title, text string) {}
-func getAutostart() bool            { return fakeAutostart }
-func setAutostart(on bool) error    { fakeAutostart = on; return nil }
-func quitApp(code int)              { os.Exit(code) }
+func steamRoot() string             { return os.Getenv("SIMLAUNCHER_STEAM") }
+
+func getAutostart() bool         { return fakeAutostart }
+func setAutostart(on bool) error { fakeAutostart = on; return nil }
+func quitApp(code int)           { os.Exit(code) }

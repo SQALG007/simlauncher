@@ -59,6 +59,7 @@ const (
 	tpmRightButton = 0x2
 	cmdOpen        = 1
 	cmdQuit        = 2
+	cmdEnd         = 3
 	cmdGameBase    = 100
 )
 
@@ -189,6 +190,8 @@ func showTrayMenu() {
 			trayGameIDs = append(trayGameIDs, g.ID)
 		}
 		appendMenu(menu, mfSeparator, 0, "")
+		appendMenu(menu, mfString, cmdEnd, T("tray_end"))
+		appendMenu(menu, mfSeparator, 0, "")
 	}
 	appendMenu(menu, mfString, cmdQuit, T("tray_quit"))
 
@@ -203,6 +206,13 @@ func showTrayMenu() {
 		openUI(trayURL)
 	case cmd == cmdQuit:
 		quitApp(0)
+	case cmd == cmdEnd:
+		go func() {
+			if c, err := loadConfig(); err == nil {
+				closed, _ := endSession(c)
+				trayNotify("SimLauncher", T("end_done", len(closed)))
+			}
+		}()
 	case cmd >= cmdGameBase && int(cmd-cmdGameBase) < len(trayGameIDs):
 		id := trayGameIDs[cmd-cmdGameBase]
 		go func() {
@@ -294,6 +304,27 @@ func setAutostart(on bool) error {
 		return err
 	}
 	return hidden(exec.Command("reg", "add", runKey, "/v", "SimLauncher", "/t", "REG_SZ", "/d", `"`+exe+`" --tray`, "/f")).Run()
+}
+
+// steamRoot renvoie le dossier d'installation de Steam (registre, sinon emplacement par défaut).
+func steamRoot() string {
+	if p := os.Getenv("SIMLAUNCHER_STEAM"); p != "" {
+		return p
+	}
+	out, err := hidden(exec.Command("reg", "query", `HKCU\Software\Valve\Steam`, "/v", "SteamPath")).Output()
+	if err == nil {
+		for _, l := range strings.Split(string(out), "\n") {
+			if i := strings.Index(l, "REG_SZ"); i >= 0 {
+				if p := strings.TrimSpace(l[i+len("REG_SZ"):]); p != "" {
+					return filepath.Clean(p)
+				}
+			}
+		}
+	}
+	if def := `C:\Program Files (x86)\Steam`; fileExists(filepath.Join(def, "steam.exe")) {
+		return def
+	}
+	return ""
 }
 
 func quitApp(code int) {

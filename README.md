@@ -18,6 +18,9 @@ A VR sim racing session usually means opening four or five programs in the right
 - **Optional auto-close**: when the game exits, close the apps you marked (for example Crew Chief).
 - **Your own game pictures**: pick any .jpg, .png or .webp image in Settings and it becomes the background of that game's card.
 - **Built-in updates**: SimLauncher checks GitHub Releases for new versions and updates itself in one click, or automatically if you allow it (never during a session). Downloads are checked against the release's SHA-256.
+- **Steam detection**: *Settings › Find my Steam games* lists the racing games installed in Steam and adds the ones you tick, with their Steam picture, process name and companion apps.
+- **End session**: one button (or Stream Deck key, or tray menu) closes the game and every companion app.
+- **Home Assistant and webhooks**: a POST request at the start and end of every session, to switch on the rig lights or set a scene.
 - **Stream Deck ready**: every game has a command line to paste into a *System › Open* key. Key icons are included in `assets/streamdeck`.
 - **Tray icon**: start with Windows as an icon next to the clock. Right-click to launch a game, double-click to open the interface.
 - **MCP server**: let an AI assistant (Claude Desktop and others) list and launch your games.
@@ -39,6 +42,7 @@ The default configuration targets a Pimax + MOZA + SimHub + Crew Chief rig with 
 | Double-click `SimLauncher.exe` | Opens the interface (an Edge app window). It stops when you close the window, unless it is running as a tray icon. |
 | Settings › *Start with Windows* | Starts hidden at logon with a tray icon (`--tray`). |
 | Stream Deck *System › Open* with `"C:\…\SimLauncher.exe" --game ams2` | Runs the sequence with no window. A message box appears only if something goes wrong. |
+| Stream Deck *System › Open* with `"C:\…\SimLauncher.exe" --end` | Ends the session: closes the game and every companion app. |
 
 ### Command line
 
@@ -56,7 +60,7 @@ Game IDs are shown in the **Stream Deck** tab.
 
 ## MCP server (AI assistants)
 
-SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio. Tools: `list_games`, `launch_game`, `list_apps`, `start_app`, `stop_app`, `get_status`, `add_game`, `add_app`. For example, ask "add iRacing to SimLauncher" or "add OpenKneeboard before AMS2 and LMU". When SimLauncher is already running in the tray, the MCP server relays commands to it, so the interface and the auto-close watcher stay in sync.
+SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio. Tools: `list_games`, `launch_game`, `list_apps`, `start_app`, `stop_app`, `get_status`, `add_game`, `add_app`, `end_session`, `scan_steam_games`, `import_steam_games`. For example, ask "add iRacing to SimLauncher" or "add OpenKneeboard before AMS2 and LMU". When SimLauncher is already running in the tray, the MCP server relays commands to it, so the interface and the auto-close watcher stay in sync.
 
 Claude Desktop, `claude_desktop_config.json`:
 
