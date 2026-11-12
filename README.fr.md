@@ -31,12 +31,14 @@ Une session de sim racing en VR, c'est souvent quatre ou cinq logiciels à ouvri
 **Lancement**
 - **Une séquence par jeu** : les logiciels à démarrer avant chaque jeu, leur ordre et une pause après chacun.
 - **Déjà ouvert ? Ignoré.** Rien n'est lancé deux fois.
+- **Profils de séquence** : par exemple *VR* (le casque et tout le reste) et *Écran* (sans casque). Chaque carte affiche un bouton par profil, et chaque profil a sa propre commande Stream Deck.
 - **Feux de départ** : cinq feux suivent la séquence et passent au vert quand le jeu est lancé.
 - **Fin de session** : un bouton, une touche Stream Deck ou le menu de l'icône ferme le jeu et tous les logiciels.
 - **Fermeture automatique (option)** : quand le jeu se termine, SimLauncher ferme les logiciels cochés (Crew Chief, par exemple).
 
 **Ta bibliothèque**
 - **Détection des jeux Steam** : retrouve les jeux de course installés dans Steam et ajoute ceux que tu coches, avec leur image Steam, leur processus et les logiciels compagnons.
+- **Temps de jeu** : heures jouées et dernière session sur chaque carte. Les jeux Steam affichent tout l'historique enregistré par Steam ; les autres sont chronométrés par SimLauncher tant qu'il tourne.
 - **Images des jeux** : la bannière Steam ou n'importe quelle image .jpg, .png ou .webp en fond de carte, avec l'option de masquer le nom quand l'image contient déjà le logo.
 
 **Intégrations**
@@ -75,6 +77,7 @@ La configuration par défaut vise un rig Pimax + MOZA + SimHub + Crew Chief avec
 | **Séquence** | Pause avant le jeu, fermeture automatique des logiciels à la fin du jeu, démarrage avec Windows, port de l'interface. |
 | **Mises à jour** | Vérifier automatiquement les nouvelles versions (activé par défaut), les installer automatiquement (désactivé par défaut), *Vérifier maintenant*. |
 | **Home Assistant et webhooks** | Deux adresses appelées au début et à la fin d'une session, chacune avec un bouton *Tester*. Voir [plus bas](#home-assistant-et-webhooks). |
+| **Profils de séquence** | Nom, identifiant et logiciels autorisés dans chaque profil. Un jeu ne démarre que les logiciels qu'il a *et* que le profil autorise. |
 | **Logiciels compagnons** | Nom, chemin, arguments, processus, pause après le démarrage, *Fermer après* (fermé à la fin du jeu). L'ordre de la liste est l'ordre de démarrage. |
 | **Jeux** | *Détecter mes jeux Steam*, puis pour chaque jeu : nom, identifiant, AppID Steam ou exécutable, arguments, processus, couleur, image de la carte (*Parcourir* ou *Image Steam*), *Masquer le nom*, logiciels à démarrer avant. |
 
@@ -146,8 +149,8 @@ SimLauncher parle le [Model Context Protocol](https://modelcontextprotocol.io) s
 
 | Outil | Ce qu'il fait |
 |---|---|
-| `list_games`, `list_apps`, `get_status` | Jeux, logiciels (lancés ou introuvables) et étape en cours |
-| `launch_game` | Lance la séquence complète d'un jeu |
+| `list_games`, `list_apps`, `get_status` | Jeux (avec temps de jeu), profils, logiciels (lancés ou introuvables) et étape en cours |
+| `launch_game` | Lance la séquence complète d'un jeu, avec un profil si besoin |
 | `start_app`, `stop_app` | Démarre ou ferme un logiciel |
 | `end_session` | Ferme le jeu et tous les logiciels |
 | `add_game`, `add_app` | Ajoute un jeu (AppID Steam ou .exe) ou un logiciel, éventuellement à certains jeux |
@@ -162,6 +165,7 @@ Si SimLauncher tourne déjà en icône, le serveur MCP lui transmet les commande
 ```
 SimLauncher.exe                         ouvre l'interface
 SimLauncher.exe --game <id>             lance la séquence (Stream Deck, raccourcis)
+SimLauncher.exe --game <id> --profile <p>   utilise un profil de séquence (vr, ecran…)
 SimLauncher.exe --game <id> --apps      démarre seulement les logiciels compagnons
 SimLauncher.exe --game <id> --nowait    ne surveille pas la fermeture du jeu
 SimLauncher.exe --end                   fin de session : ferme le jeu et tous les logiciels
@@ -184,6 +188,7 @@ Tout reste sur ton PC, dans `%APPDATA%\SimLauncher` :
 |---|---|
 | `config.json` | Tes réglages |
 | `covers\` | Les images copiées depuis Steam |
+| `stats.json` | Le temps de jeu mesuré par SimLauncher (celui de Steam est seulement lu, jamais modifié) |
 | `launcher.log` | Le journal des dernières sessions |
 | `crash.log` | Le détail d'une erreur, si SimLauncher plante |
 
@@ -211,6 +216,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Fichier | Rôle |
 |---|---|
+| `stats.go` | Temps de jeu |
 | `launcher.go`, `session.go` | Séquence de lancement, fin de session, webhooks |
 | `steam.go` | Bibliothèque et images Steam |
 | `update.go` | Mise à jour automatique |
@@ -225,6 +231,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Version | Changements |
 |---|---|
+| 1.5.0 | Profils de séquence (cartes, icône, `--profile`, Stream Deck, MCP) et temps de jeu par jeu. |
 | 1.4.1 | Les mises à jour fonctionnent même si le serveur MCP de Claude Desktop utilise encore l'ancien exe. |
 | 1.4.0 | Détection des jeux Steam avec images, *Fin de session* (bouton, icône, `--end`, MCP), webhooks Home Assistant, outils MCP `end_session`, `scan_steam_games`, `import_steam_games`. |
 | 1.3.0 | Outils MCP `add_game` et `add_app`. |

@@ -113,8 +113,10 @@ var (
 	trayNid     notifyIconData
 	trayURL     string
 	taskbarMsg  uintptr
-	trayGameIDs []string
+	trayGameIDs []trayItem
 )
+
+type trayItem struct{ game, profile string }
 
 func setUTF16(dst []uint16, s string) {
 	u := append(utf16.Encode([]rune(strings.ReplaceAll(s, "\x00", ""))), 0)
@@ -186,8 +188,18 @@ func showTrayMenu() {
 			if busy {
 				flags |= mfGrayed
 			}
-			appendMenu(menu, flags, uintptr(cmdGameBase+len(trayGameIDs)), T("tray_launch", g.Name))
-			trayGameIDs = append(trayGameIDs, g.ID)
+			if len(c.Profiles) == 0 {
+				appendMenu(menu, flags, uintptr(cmdGameBase+len(trayGameIDs)), T("tray_launch", g.Name))
+				trayGameIDs = append(trayGameIDs, trayItem{g.ID, ""})
+				continue
+			}
+			// Un sous-menu par jeu, une entrée par profil.
+			sub, _, _ := procCreatePopupMenu.Call()
+			for _, pr := range c.Profiles {
+				appendMenu(sub, flags, uintptr(cmdGameBase+len(trayGameIDs)), pr.Name)
+				trayGameIDs = append(trayGameIDs, trayItem{g.ID, pr.ID})
+			}
+			appendMenu(menu, mfPopup|flags, sub, T("tray_launch", g.Name))
 		}
 		appendMenu(menu, mfSeparator, 0, "")
 		appendMenu(menu, mfString, cmdEnd, T("tray_end"))
@@ -214,7 +226,8 @@ func showTrayMenu() {
 			}
 		}()
 	case cmd >= cmdGameBase && int(cmd-cmdGameBase) < len(trayGameIDs):
-		id := trayGameIDs[cmd-cmdGameBase]
+		item := trayGameIDs[cmd-cmdGameBase]
+		id := item.game
 		go func() {
 			c, err := loadConfig()
 			if err != nil {
@@ -222,7 +235,7 @@ func showTrayMenu() {
 			}
 			g, _ := c.game(id)
 			trayNotify("SimLauncher", T("tray_starting", g.Name))
-			if err := launchGame(c, id); err != nil {
+			if err := launchGameProfile(c, id, item.profile); err != nil {
 				trayNotify(T("err_title"), err.Error())
 				return
 			}

@@ -31,12 +31,14 @@ A VR sim racing session usually means opening four or five programs in the right
 **Launching**
 - **A sequence per game**: choose which companion apps start before each game, in which order, with a delay after each one.
 - **Already running? Skipped.** Nothing is started twice.
+- **Sequence profiles**: for example *VR* (headset and everything else) and *Flat* (no headset). Each card shows one button per profile, and each profile has its own Stream Deck command.
 - **Starting lights**: five lights follow the sequence and turn green when the game is launched.
 - **End session**: one button, Stream Deck key or tray menu entry closes the game and every companion app.
 - **Optional auto-close**: when the game exits, SimLauncher closes the apps you marked (Crew Chief, for example).
 
 **Your library**
 - **Steam detection**: finds the racing games installed in Steam and adds the ones you tick, with their Steam picture, process name and companion apps.
+- **Play time**: hours played and last session on every card. Steam games show the full history recorded by Steam; other games are timed by SimLauncher while it is running.
 - **Game pictures**: use the Steam banner or any .jpg, .png or .webp image as the card background, and hide the name when the picture already shows the logo.
 
 **Integrations**
@@ -75,6 +77,7 @@ The default setup is a Pimax + MOZA + SimHub + Crew Chief rig with AMS2, ACC, As
 | **Sequence** | Pause before the game, auto-close of apps when the game exits, start with Windows, interface port. |
 | **Updates** | Check for new versions automatically (on by default), install them automatically (off by default), *Check now*. |
 | **Home Assistant and webhooks** | Two URLs called at the start and end of a session, each with a *Test* button. See [below](#home-assistant-and-webhooks). |
+| **Sequence profiles** | Name, ID and the apps allowed in each profile. A game only starts the apps it has *and* the profile allows. |
 | **Companion apps** | Name, path, arguments, process name, delay after start, *Close after* (closed when the game exits). The order of the list is the start order. |
 | **Games** | *Find my Steam games*, then for each game: name, ID, Steam AppID or executable, arguments, process name, colour, card picture (*Browse* or *Steam picture*), *Hide the name*, apps to start first. |
 
@@ -146,8 +149,8 @@ SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io)
 
 | Tool | What it does |
 |---|---|
-| `list_games`, `list_apps`, `get_status` | Games, apps (running or missing) and the current step |
-| `launch_game` | Runs the full sequence for a game |
+| `list_games`, `list_apps`, `get_status` | Games (with play time), profiles, apps (running or missing) and the current step |
+| `launch_game` | Runs the full sequence for a game, optionally with a profile |
 | `start_app`, `stop_app` | Starts or closes one app |
 | `end_session` | Closes the game and every app |
 | `add_game`, `add_app` | Adds a game (Steam AppID or .exe) or an app, optionally to some games |
@@ -162,6 +165,7 @@ When SimLauncher is already running in the tray, the MCP server relays commands 
 ```
 SimLauncher.exe                         open the interface
 SimLauncher.exe --game <id>             run the launch sequence (Stream Deck, shortcuts)
+SimLauncher.exe --game <id> --profile <p>   use a sequence profile (vr, flat…)
 SimLauncher.exe --game <id> --apps      only start the companion apps
 SimLauncher.exe --game <id> --nowait    don't watch for the game exit
 SimLauncher.exe --end                   end the session: close the game and every app
@@ -184,6 +188,7 @@ Everything stays on your PC, in `%APPDATA%\SimLauncher`:
 |---|---|
 | `config.json` | Your settings |
 | `covers\` | Pictures copied from Steam |
+| `stats.json` | Play time measured by SimLauncher (Steam's own play time is only read, never changed) |
 | `launcher.log` | Log of the last sessions |
 | `crash.log` | Error details, if SimLauncher ever crashes |
 
@@ -211,6 +216,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | File | Role |
 |---|---|
+| `stats.go` | Play time |
 | `launcher.go`, `session.go` | Launch sequence, end of session, webhooks |
 | `steam.go` | Steam library and pictures |
 | `update.go` | Self-update |
@@ -225,6 +231,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.5.0 | Sequence profiles (cards, tray, `--profile`, Stream Deck, MCP) and play time per game. |
 | 1.4.1 | Updates work even when Claude Desktop's MCP server still uses the previous exe. |
 | 1.4.0 | Steam detection with pictures, *End session* (button, tray, `--end`, MCP), Home Assistant webhooks, MCP tools `end_session`, `scan_steam_games`, `import_steam_games`. |
 | 1.3.0 | MCP tools `add_game` and `add_app`. |

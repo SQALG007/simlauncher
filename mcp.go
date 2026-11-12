@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -54,7 +55,10 @@ func idArg(name, desc string) map[string]any {
 
 var mcpTools = []mcpTool{
 	{"list_games", "List the sim racing games configured in SimLauncher, with their ID, name and whether they are running.", noArgs()},
-	{"launch_game", "Run the launch sequence for a game: start its companion apps (VR runtime, wheel software, SimHub, Crew Chief...) if they are not running, wait, then start the game. Returns the steps performed.", idArg("game_id", "Game ID from list_games, e.g. \"ams2\"")},
+	{"launch_game", "Run the launch sequence for a game: start its companion apps (VR runtime, wheel software, SimHub, Crew Chief...) if they are not running, wait, then start the game. Returns the steps performed.", map[string]any{"type": "object", "properties": map[string]any{
+		"game_id": map[string]any{"type": "string", "description": "Game ID from list_games, e.g. \"ams2\""},
+		"profile": map[string]any{"type": "string", "description": "Optional sequence profile ID from list_games, e.g. \"vr\" or \"flat\""},
+	}, "required": []string{"game_id"}, "additionalProperties": false}},
 	{"list_apps", "List the companion apps (VR runtime, wheel base software, SimHub...) and whether each is running or missing.", noArgs()},
 	{"start_app", "Start one companion app if it is not already running.", idArg("app_id", "App ID from list_apps, e.g. \"simhub\"")},
 	{"stop_app", "Close one companion app.", idArg("app_id", "App ID from list_apps")},
@@ -65,7 +69,7 @@ var mcpTools = []mcpTool{
 
 type backend interface {
 	state() (stateResp, error)
-	launch(id string) ([]string, error)
+	launch(id, profile string) ([]string, error)
 	app(id, action string) error
 }
 
@@ -101,13 +105,13 @@ func (r remoteBackend) state() (stateResp, error) {
 	return s, r.do("GET", "/api/state", nil, &s)
 }
 
-func (r remoteBackend) launch(id string) ([]string, error) {
+func (r remoteBackend) launch(id, profile string) ([]string, error) {
 	before, err := r.state()
 	if err != nil {
 		return nil, err
 	}
 	n0 := len(before.Status.History)
-	if err := r.do("POST", "/api/launch/"+id, struct{}{}, nil); err != nil {
+	if err := r.do("POST", "/api/launch/"+id+"?profile="+url.QueryEscape(profile), struct{}{}, nil); err != nil {
 		return nil, err
 	}
 	deadline := time.Now().Add(3 * time.Minute)
@@ -139,13 +143,13 @@ type localBackend struct{}
 
 func (localBackend) state() (stateResp, error) { return buildState() }
 
-func (localBackend) launch(id string) ([]string, error) {
+func (localBackend) launch(id, profile string) ([]string, error) {
 	c, err := loadConfig()
 	if err != nil {
 		return nil, err
 	}
 	n0 := len(getStatus().History)
-	err = launchGame(c, id)
+	err = launchGameProfile(c, id, profile)
 	h := getStatus().History
 	if n0 > len(h) {
 		n0 = 0
@@ -229,16 +233,33 @@ func callTool(name string, args map[string]any) map[string]any {
 		switch name {
 		case "list_games":
 			type g struct {
-				ID      string `json:"id"`
-				Name    string `json:"name"`
-				Enabled bool   `json:"enabled"`
-				Running bool   `json:"running"`
+				ID       string  `json:"id"`
+				Name     string  `json:"name"`
+				Enabled  bool    `json:"enabled"`
+				Running  bool    `json:"running"`
+				Hours    float64 `json:"playtime_hours"`
+				Sessions int     `json:"sessions"`
+				Last     string  `json:"last_played,omitempty"`
+			}
+			type p struct {
+				ID   string   `json:"id"`
+				Name string   `json:"name"`
+				Apps []string `json:"apps"`
 			}
 			var l []g
 			for _, x := range s.Games {
-				l = append(l, g{x.ID, x.Name, x.Enabled, x.Running})
+				st := s.Stats[x.ID]
+				e := g{ID: x.ID, Name: x.Name, Enabled: x.Enabled, Running: x.Running, Hours: float64(st.Seconds/36) / 100, Sessions: st.Sessions}
+				if st.LastPlayed > 0 {
+					e.Last = time.Unix(st.LastPlayed, 0).Format("2006-01-02 15:04")
+				}
+				l = append(l, e)
 			}
-			out = l
+			var ps []p
+			for _, x := range s.Config.Profiles {
+				ps = append(ps, p{x.ID, x.Name, x.Apps})
+			}
+			out = map[string]any{"games": l, "profiles": ps}
 		case "list_apps":
 			type a struct {
 				ID      string `json:"id"`
@@ -265,7 +286,12 @@ func callTool(name string, args map[string]any) map[string]any {
 		if _, ok := c.game(id); !ok {
 			return toolText(T("game_unknown", id), true)
 		}
-		steps, err := b.launch(id)
+		if p := str("profile"); p != "" {
+			if _, ok := c.profile(p); !ok {
+				return toolText(T("profile_unknown", p), true)
+			}
+		}
+		steps, err := b.launch(id, str("profile"))
 		text := strings.Join(steps, "\n")
 		if err != nil {
 			return toolText(strings.TrimSpace(text+"\n"+err.Error()), true)

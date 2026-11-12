@@ -34,17 +34,18 @@ type gameState struct {
 }
 
 type stateResp struct {
-	Config    Config      `json:"config"`
-	Apps      []appState  `json:"apps"`
-	Games     []gameState `json:"games"`
-	Status    Status      `json:"status"`
-	ExePath   string      `json:"exePath"`
-	CfgPath   string      `json:"cfgPath"`
-	Version   string      `json:"version"`
-	Tray      bool        `json:"tray"`
-	Autostart bool        `json:"autostart"`
-	Lang      string      `json:"lang"`
-	Update    UpdateInfo  `json:"update"`
+	Config    Config               `json:"config"`
+	Apps      []appState           `json:"apps"`
+	Games     []gameState          `json:"games"`
+	Status    Status               `json:"status"`
+	ExePath   string               `json:"exePath"`
+	CfgPath   string               `json:"cfgPath"`
+	Version   string               `json:"version"`
+	Tray      bool                 `json:"tray"`
+	Autostart bool                 `json:"autostart"`
+	Lang      string               `json:"lang"`
+	Update    UpdateInfo           `json:"update"`
+	Stats     map[string]GameStats `json:"stats"`
 }
 
 var trayMode bool
@@ -81,7 +82,7 @@ func buildState() (stateResp, error) {
 	}
 	running, _ := sysImpl.Running()
 	exe, _ := os.Executable()
-	s := stateResp{Config: c, Status: getStatus(), ExePath: exe, CfgPath: configPath(), Version: version, Tray: trayMode, Autostart: getAutostart(), Lang: lang(), Update: getUpdate()}
+	s := stateResp{Config: c, Status: getStatus(), ExePath: exe, CfgPath: configPath(), Version: version, Tray: trayMode, Autostart: getAutostart(), Lang: lang(), Update: getUpdate(), Stats: gameStats(c)}
 	for _, a := range c.Apps {
 		s.Apps = append(s.Apps, appState{App: a, Running: isRunning(running, a.Process), Found: sysImpl.FileExists(a.Path)})
 	}
@@ -150,12 +151,17 @@ func newMux() *http.ServeMux {
 			writeErr(w, 404, TE("game_unknown", id))
 			return
 		}
+		profile := r.URL.Query().Get("profile")
+		if _, ok := c.profile(profile); profile != "" && !ok {
+			writeErr(w, 404, TE("profile_unknown", profile))
+			return
+		}
 		if getStatus().Busy {
 			writeErr(w, 409, TE("busy", getStatus().Game))
 			return
 		}
 		go func() {
-			if err := launchGame(c, id); err != nil {
+			if err := launchGameProfile(c, id, profile); err != nil {
 				log.Print(err)
 				return
 			}
@@ -395,6 +401,7 @@ func runUI(c Config, tray bool) error {
 	trayMode = tray
 	lastPing.Store(time.Now().Unix())
 	go updateLoop()
+	go statsLoop()
 	if tray {
 		go func() {
 			if err := http.Serve(ln, newMux()); err != nil {

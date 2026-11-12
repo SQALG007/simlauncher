@@ -47,11 +47,19 @@ type Settings struct {
 	WebhookEnd      string `json:"webhookEnd,omitempty"`    // URL appelée à la fin (jeu fermé ou « Fin de session »)
 }
 
+// Profile : une variante de séquence (ex. « VR » ou « Écran ») qui limite les logiciels lancés.
+type Profile struct {
+	ID   string   `json:"id"`
+	Name string   `json:"name"`
+	Apps []string `json:"apps"` // logiciels autorisés dans ce profil (parmi ceux du jeu)
+}
+
 type Config struct {
-	Version  int      `json:"version"`
-	Settings Settings `json:"settings"`
-	Apps     []App    `json:"apps"`
-	Games    []Game   `json:"games"`
+	Version  int       `json:"version"`
+	Settings Settings  `json:"settings"`
+	Apps     []App     `json:"apps"`
+	Games    []Game    `json:"games"`
+	Profiles []Profile `json:"profiles,omitempty"`
 }
 
 var cfgMu sync.Mutex
@@ -193,6 +201,28 @@ func (c *Config) validate() error {
 			}
 		}
 	}
+	for i := range c.Profiles {
+		p := &c.Profiles[i]
+		p.ID = strings.ToLower(strings.TrimSpace(p.ID))
+		if !idRe.MatchString(p.ID) {
+			return TE("v_profile_id", p.ID)
+		}
+		if seen["profile:"+p.ID] {
+			return TE("v_profile_dup", p.ID)
+		}
+		seen["profile:"+p.ID] = true
+		if strings.TrimSpace(p.Name) == "" {
+			return TE("v_profile_name", p.ID)
+		}
+		if p.Apps == nil {
+			p.Apps = []string{}
+		}
+		for _, a := range p.Apps {
+			if !seen["app:"+a] {
+				return TE("v_game_app", p.Name, a)
+			}
+		}
+	}
 	if c.Settings.DelayBeforeGame < 0 || c.Settings.DelayBeforeGame > 120 {
 		return TE("v_pause")
 	}
@@ -218,6 +248,37 @@ func (c *Config) game(id string) (Game, bool) {
 		}
 	}
 	return Game{}, false
+}
+
+func (c *Config) profile(id string) (Profile, bool) {
+	for _, p := range c.Profiles {
+		if strings.EqualFold(p.ID, id) {
+			return p, true
+		}
+	}
+	return Profile{}, false
+}
+
+// sequence renvoie les logiciels à démarrer pour un jeu, filtrés par le profil s'il y en a un.
+func (c *Config) sequence(g Game, profileID string) ([]string, string, error) {
+	if profileID == "" {
+		return g.Apps, "", nil
+	}
+	p, ok := c.profile(profileID)
+	if !ok {
+		return nil, "", TE("profile_unknown", profileID)
+	}
+	allowed := map[string]bool{}
+	for _, a := range p.Apps {
+		allowed[a] = true
+	}
+	var apps []string
+	for _, a := range g.Apps {
+		if allowed[a] {
+			apps = append(apps, a)
+		}
+	}
+	return apps, p.Name, nil
 }
 
 func (c *Config) app(id string) (App, bool) {

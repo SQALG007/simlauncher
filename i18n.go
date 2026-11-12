@@ -124,6 +124,12 @@ var catalog = map[string]map[string]string{
 	"steam_no_appid":      {"fr": "« %s » n'a pas d'AppID Steam", "en": "\"%s\" has no Steam AppID", "pt": "\"%s\" não tem AppID Steam", "es": "«%s» no tiene AppID de Steam", "zh": "“%s”没有 Steam AppID"},
 	"v_webhook":           {"fr": "les webhooks doivent commencer par http:// ou https://", "en": "webhooks must start with http:// or https://", "pt": "os webhooks devem começar com http:// ou https://", "es": "los webhooks deben empezar por http:// o https://", "zh": "Webhook 必须以 http:// 或 https:// 开头"},
 	"webhook_empty":       {"fr": "aucune URL n'est enregistrée pour ce webhook", "en": "no URL is saved for this webhook", "pt": "nenhuma URL salva para este webhook", "es": "no hay ninguna URL guardada para este webhook", "zh": "此 Webhook 未保存 URL"},
+	"seq_start_profile":   {"fr": "=== Lancement de %s (profil %s) ===", "en": "=== Launching %s (%s profile) ===", "pt": "=== Iniciando %s (perfil %s) ===", "es": "=== Lanzando %s (perfil %s) ===", "zh": "=== 正在启动 %s（%s 配置）==="},
+	"profile_unknown":     {"fr": "profil inconnu : %s", "en": "unknown profile: %s", "pt": "perfil desconhecido: %s", "es": "perfil desconocido: %s", "zh": "未知配置：%s"},
+	"v_profile_id":        {"fr": "identifiant de profil invalide : « %s » (lettres minuscules, chiffres, - et _)", "en": "invalid profile ID: \"%s\" (lowercase letters, digits, - and _)", "pt": "ID de perfil inválido: \"%s\" (letras minúsculas, dígitos, - e _)", "es": "ID de perfil no válido: «%s» (minúsculas, dígitos, - y _)", "zh": "配置 ID 无效：“%s”（小写字母、数字、- 和 _）"},
+	"v_profile_dup":       {"fr": "deux profils ont l'identifiant « %s »", "en": "two profiles share the ID \"%s\"", "pt": "dois perfis têm o ID \"%s\"", "es": "dos perfiles tienen el ID «%s»", "zh": "两个配置的 ID 都是“%s”"},
+	"v_profile_name":      {"fr": "le profil « %s » n'a pas de nom", "en": "profile \"%s\" has no name", "pt": "o perfil \"%s\" não tem nome", "es": "el perfil «%s» no tiene nombre", "zh": "配置“%s”没有名称"},
+	"tray_launch_profile": {"fr": "%s", "en": "%s", "pt": "%s", "es": "%s", "zh": "%s"},
 	"pick_all":            {"fr": "Tous les fichiers", "en": "All files", "pt": "Todos os arquivos", "es": "Todos los archivos", "zh": "所有文件"},
 	"shell_fail":          {"fr": "le démarrage a échoué (code %d)", "en": "start failed (code %d)", "pt": "a inicialização falhou (código %d)", "es": "el inicio falló (código %d)", "zh": "启动失败（代码 %d）"},
 	// --- ligne de commande / icône

@@ -86,11 +86,19 @@ func startApp(a App) (bool, error) {
 }
 
 // launchGame exécute la séquence : logiciels compagnons, pause, puis le jeu.
-func launchGame(c Config, gameID string) error {
+func launchGame(c Config, gameID string) error { return launchGameProfile(c, gameID, "") }
+
+// launchGameProfile lance un jeu avec un profil de séquence ("" = tous les logiciels du jeu).
+func launchGameProfile(c Config, gameID, profileID string) error {
 	g, ok := c.game(gameID)
 	if !ok {
 		return TE("game_unknown", gameID)
 	}
+	apps, pname, err := c.sequence(g, profileID)
+	if err != nil {
+		return err
+	}
+	g.Apps = apps
 	stMu.Lock()
 	if status.Busy {
 		stMu.Unlock()
@@ -106,7 +114,11 @@ func launchGame(c Config, gameID string) error {
 		stMu.Unlock()
 	}()
 
-	setStep("%s", T("seq_start", g.Name))
+	if pname != "" {
+		setStep("%s", T("seq_start_profile", g.Name, pname))
+	} else {
+		setStep("%s", T("seq_start", g.Name))
+	}
 	fireStart(c, g)
 	started := 0
 	var errs []string
