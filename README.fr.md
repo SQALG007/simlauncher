@@ -8,7 +8,7 @@ Une session de sim racing en VR, c'est souvent quatre ou cinq logiciels à ouvri
 
 [English](README.md) · [Télécharger la dernière version](../../releases/latest)
 
-![SimLauncher](docs/screenshot-games.png)
+![SimLauncher](docs/screenshot-v1.4.png)
 
 ## Sommaire
 

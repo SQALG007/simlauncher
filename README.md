@@ -8,7 +8,7 @@ A VR sim racing session usually means opening four or five programs in the right
 
 [Français](README.fr.md) · [Download the latest release](../../releases/latest)
 
-![SimLauncher](docs/screenshot-games.png)
+![SimLauncher](docs/screenshot-v1.4.png)
 
 ## Contents
 
