@@ -45,6 +45,7 @@ type Settings struct {
 	AutoUpdate      bool   `json:"autoUpdate,omitempty"`    // installer les mises à jour sans demander
 	WebhookStart    string `json:"webhookStart,omitempty"`  // URL appelée (POST) au début d'une session
 	WebhookEnd      string `json:"webhookEnd,omitempty"`    // URL appelée à la fin (jeu fermé ou « Fin de session »)
+	CardStyle       string `json:"cardStyle,omitempty"`     // classic (défaut), band, sheet, row
 }
 
 // Profile : une variante de séquence (ex. « VR » ou « Écran ») qui limite les logiciels lancés.
@@ -222,6 +223,11 @@ func (c *Config) validate() error {
 				return TE("v_game_app", p.Name, a)
 			}
 		}
+	}
+	switch c.Settings.CardStyle {
+	case "", "classic", "band", "sheet", "row":
+	default:
+		return TE("v_card_style", c.Settings.CardStyle)
 	}
 	if c.Settings.DelayBeforeGame < 0 || c.Settings.DelayBeforeGame > 120 {
 		return TE("v_pause")

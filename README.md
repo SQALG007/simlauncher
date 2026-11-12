@@ -8,11 +8,12 @@ A VR sim racing session usually means opening four or five programs in the right
 
 [Français](README.fr.md) · [Download the latest release](../../releases/latest)
 
-![SimLauncher](docs/screenshot-v1.4.png)
+![SimLauncher](docs/v1.6-games.png)
 
 ## Contents
 
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Install](#install)
 - [Quick start](#quick-start)
 - [Settings](#settings)
@@ -39,6 +40,7 @@ A VR sim racing session usually means opening four or five programs in the right
 **Your library**
 - **Steam detection**: finds the racing games installed in Steam and adds the ones you tick, with their Steam picture, process name and companion apps.
 - **Play time**: hours played and last session on every card. Steam games show the full history recorded by Steam; other games are timed by SimLauncher while it is running.
+- **Card styles**: four looks for the Games tab (Classic, Band, Sheet, Horizontal), picked in *Settings › Appearance*.
 - **Game pictures**: use the Steam banner or any .jpg, .png or .webp image as the card background, and hide the name when the picture already shows the logo.
 
 **Integrations**
@@ -51,6 +53,15 @@ A VR sim racing session usually means opening four or five programs in the right
 - **Built-in updates**: a banner when a new version is out, one-click install, or fully automatic if you allow it (never during a session). Every download is checked against the release's SHA-256.
 - **5 languages**: English, Français, Português (Brasil), Español, 简体中文. Follows the Windows language by default.
 - **Single portable .exe**: no installer, nothing else to install.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Find my Steam games](docs/v1.6-steam.png) | ![Settings](docs/v1.6-settings.png) |
+| *Settings › Games › Find my Steam games* | *Settings: tabs on the left, one collapsible line per game* |
+| ![Card styles](docs/v1.6-appearance.png) | ![Stream Deck](docs/v1.6-streamdeck.png) |
+| *Settings › Appearance: four card styles* | *Stream Deck tab: one command per game and profile* |
 
 ## Install
 
@@ -76,12 +87,13 @@ Settings are split into tabs on the left. *Save* applies the changes of every ta
 
 | Section | What you set |
 |---|---|
+| **Appearance** | Card style for the Games tab: Classic, Band, Sheet or Horizontal, with a preview of each. |
 | **General** | Pause before the game, auto-close of apps when the game exits, start with Windows, interface port. |
 | **Games** | *Find my Steam games*, then one line per game (click to expand): name, ID, Steam AppID or executable, arguments, process name, colour, card picture (*Browse* or *Steam picture*), *Hide the name*, apps to start first. |
 | **Apps** | One line per companion app: name, path, arguments, process name, delay after start, *Close after* (closed when the game exits). The order of the list is the start order. |
 | **Profiles** | Name, ID and the apps allowed in each profile. A game only starts the apps it has *and* the profile allows. |
 | **Integrations** | Home Assistant and webhooks: two URLs called at the start and end of a session, each with a *Test* button. See [below](#home-assistant-and-webhooks). |
-| **Updates** | Check for new versions automatically (on by default), install them automatically (off by default), *Check now*. |
+| **Updates** | Check for new versions automatically (on by default), install them automatically (off by default), *Check now*, links to the project, release notes and issues on GitHub. |
 
 **Process names** (for example `AMS2AVX.exe`) let SimLauncher know whether something is already running, and close it at the end. The exact name is in Task Manager › Details.
 
@@ -234,6 +246,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.6.0 | Card styles (*Appearance* tab), play time and launch buttons under the picture, GitHub links in *Updates*, new screenshots. |
 | 1.5.1 | Settings split into tabs with collapsible lines; clear message when an app can't be closed because it runs as administrator. |
 | 1.5.0 | Sequence profiles (cards, tray, `--profile`, Stream Deck, MCP) and play time per game. |
 | 1.4.1 | Updates work even when Claude Desktop's MCP server still uses the previous exe. |
