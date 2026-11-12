@@ -196,6 +196,16 @@ func callTool(name string, args map[string]any) map[string]any {
 	str := func(k string) string { v, _ := args[k].(string); return strings.TrimSpace(v) }
 
 	switch name {
+	case "add_game", "add_app":
+		f := mcpAddGame
+		if name == "add_app" {
+			f = mcpAddApp
+		}
+		text, err := f(args)
+		if err != nil {
+			return toolText(err.Error(), true)
+		}
+		return toolText(text, false)
 	case "list_games", "list_apps", "get_status":
 		s, err := b.state()
 		if err != nil {
@@ -283,7 +293,7 @@ func handleRPC(req rpcReq) *rpcResp {
 			"protocolVersion": pv,
 			"capabilities":    map[string]any{"tools": map[string]any{"listChanged": false}},
 			"serverInfo":      map[string]any{"name": "simlauncher", "version": version},
-			"instructions":    "SimLauncher starts a sim racing session: companion apps (VR, wheel, SimHub, Crew Chief) then the game. Call list_games to get IDs, then launch_game.",
+			"instructions":    "SimLauncher starts a sim racing session: companion apps (VR, wheel, SimHub, Crew Chief) then the game. Call list_games to get IDs, then launch_game. add_game and add_app add new entries to the configuration.",
 		}
 	case "ping":
 		resp.Result = map[string]any{}

@@ -65,8 +65,8 @@ func TestMCPLocal(t *testing.T) {
 	if r[0]["result"].(map[string]any)["protocolVersion"] != "2025-03-26" {
 		t.Error("version de protocole non négociée")
 	}
-	if n := len(r[1]["result"].(map[string]any)["tools"].([]any)); n != 6 {
-		t.Errorf("6 outils attendus, %d", n)
+	if n := len(r[1]["result"].(map[string]any)["tools"].([]any)); n != 8 {
+		t.Errorf("8 outils attendus, %d", n)
 	}
 	if txt, _ := toolResultText(t, r[2]); !strings.Contains(txt, `"id": "ams2"`) {
 		t.Errorf("list_games : %s", txt)

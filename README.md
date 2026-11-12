@@ -56,7 +56,7 @@ Game IDs are shown in the **Stream Deck** tab.
 
 ## MCP server (AI assistants)
 
-SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio. Tools: `list_games`, `launch_game`, `list_apps`, `start_app`, `stop_app`, `get_status`. When SimLauncher is already running in the tray, the MCP server relays commands to it, so the interface and the auto-close watcher stay in sync.
+SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio. Tools: `list_games`, `launch_game`, `list_apps`, `start_app`, `stop_app`, `get_status`, `add_game`, `add_app`. For example, ask "add iRacing to SimLauncher" or "add OpenKneeboard before AMS2 and LMU". When SimLauncher is already running in the tray, the MCP server relays commands to it, so the interface and the auto-close watcher stay in sync.
 
 Claude Desktop, `claude_desktop_config.json`:
 
