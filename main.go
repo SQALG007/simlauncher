@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const version = "1.8.0"
+const version = "1.8.1"
 
 func main() {
 	gameID := flag.String("game", "", "lance le jeu indiqué (ex. ams2) sans interface — pour le Stream Deck")
@@ -92,6 +92,7 @@ func main() {
 	default:
 		cleanupOldExe()
 		migrateAutostart()
+		syncInstalledVersion()
 		// « Rester près de l'horloge » : la fenêtre s'ouvre, et fermer la fenêtre n'arrête pas RigStart.
 		if err := runUI(c, *tray || c.Settings.KeepInTray, !*tray); err != nil {
 			messageBox("RigStart", err.Error())

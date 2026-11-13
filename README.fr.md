@@ -68,11 +68,17 @@ Une session de sim racing en VR, c'est souvent quatre ou cinq logiciels à ouvri
 
 ## Installation
 
-1. Télécharge `RigStart.exe` depuis la [dernière version](../../releases/latest) et place-le dans un dossier à toi (le Bureau convient ; évite `Program Files`, qui bloque les mises à jour automatiques).
-2. Double-clique dessus. SmartScreen peut signaler une application non signée : *Informations complémentaires › Exécuter quand même*.
-3. L'interface s'ouvre dans sa propre fenêtre.
+**Installeur (recommandé)**
 
-Ensuite, RigStart se met à jour tout seul.
+1. Télécharge `RigStart-Setup.exe` depuis la [dernière version](../../releases/latest) et lance-le. SmartScreen peut signaler une application non signée : *Informations complémentaires › Exécuter quand même*.
+2. Choisis si tu veux un raccourci sur le Bureau et démarrer RigStart avec Windows. Pas besoin de droits administrateur : RigStart s'installe dans `%LOCALAPPDATA%\Programs\RigStart`.
+3. RigStart est ensuite dans le menu Démarrer, et dans *Paramètres › Applications* pour le désinstaller. La désinstallation demande si tu veux garder tes réglages.
+
+**Version portable**
+
+Télécharge plutôt `RigStart.exe` et place-le dans un dossier à toi (le Bureau convient ; évite `Program Files`, qui bloque les mises à jour automatiques). Double-clique dessus : l'interface s'ouvre dans sa propre fenêtre.
+
+Dans les deux cas, RigStart se met ensuite à jour tout seul.
 
 ### Tu utilisais SimLauncher (1.7 ou avant)
 
@@ -239,6 +245,8 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 ./build.sh                                   # → dist/RigStart.exe
 ```
 
+L'installeur se construit avec [Inno Setup 6](https://jrsoftware.org/isinfo.php) sous Windows : `iscc /DAppVersion=1.8.1 installer\rigstart.iss` → `dist\RigStart-Setup.exe`. GitHub Actions construit les deux fichiers à chaque tag.
+
 `go test ./...` tourne sur n'importe quel système (les appels Windows sont simulés). Node.js est utilisé, s'il est présent, pour vérifier que chaque langue de l'interface a toutes ses traductions.
 
 | Fichier | Rôle |
@@ -258,6 +266,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Version | Changements |
 |---|---|
+| 1.8.1 | Installeur Windows (`RigStart-Setup.exe`) : menu Démarrer, raccourci Bureau et démarrage avec Windows au choix, désinstallation depuis *Paramètres › Applications*, sans droits administrateur. |
 | 1.8.0 | Nouveau nom : RigStart (anciennement SimLauncher), nouvelle adresse GitHub (`rigstart/rigstart`), copie automatique de la configuration, des heures de jeu et des images de SimLauncher. |
 | 1.7.0 | Onglet *Général* réorganisé : rester près de l'horloge quand on ferme la fenêtre, fermeture douce ou immédiate, export et import de la configuration. |
 | 1.6.1 | Les noms des profils par défaut suivent la langue de l'interface ; les cartes Bandeau ne se chevauchent plus sur une fenêtre étroite. |

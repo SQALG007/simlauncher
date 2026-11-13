@@ -69,5 +69,6 @@ func steamRoot() string             { return os.Getenv("RIGSTART_STEAM") }
 
 func getAutostart() bool         { return fakeAutostart }
 func migrateAutostart()          {}
+func syncInstalledVersion()      {}
 func setAutostart(on bool) error { fakeAutostart = on; return nil }
 func quitApp(code int)           { os.Exit(code) }

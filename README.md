@@ -68,11 +68,17 @@ A VR sim racing session usually means opening four or five programs in the right
 
 ## Install
 
-1. Download `RigStart.exe` from the [latest release](../../releases/latest) and put it in a folder of your choice (the Desktop works; avoid `Program Files`, which blocks self-updates).
-2. Double-click it. Windows SmartScreen may warn about an unsigned app: *More info › Run anyway*.
-3. The interface opens in its own window.
+**Installer (recommended)**
 
-From then on, RigStart updates itself.
+1. Download `RigStart-Setup.exe` from the [latest release](../../releases/latest) and run it. Windows SmartScreen may warn about an unsigned app: *More info › Run anyway*.
+2. Choose whether you want a desktop shortcut and to start RigStart with Windows. No administrator rights are needed: RigStart goes to `%LOCALAPPDATA%\Programs\RigStart`.
+3. RigStart is then in the Start menu, and in *Settings › Apps* to uninstall it. Uninstalling asks whether to keep your settings.
+
+**Portable**
+
+Download `RigStart.exe` instead and put it in a folder of your choice (the Desktop works; avoid `Program Files`, which blocks self-updates). Double-click it: the interface opens in its own window.
+
+Either way, RigStart then updates itself.
 
 ### Coming from SimLauncher (1.7 or earlier)
 
@@ -239,6 +245,8 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 ./build.sh                                   # → dist/RigStart.exe
 ```
 
+The installer is built with [Inno Setup 6](https://jrsoftware.org/isinfo.php) on Windows: `iscc /DAppVersion=1.8.1 installer\rigstart.iss` → `dist\RigStart-Setup.exe`. GitHub Actions builds both files for every tag.
+
 `go test ./...` runs on any OS (Windows calls are replaced by a fake). Node.js is used, when present, to check that every interface language has every string.
 
 | File | Role |
@@ -258,6 +266,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.8.1 | Windows installer (`RigStart-Setup.exe`): Start menu, optional desktop shortcut and start with Windows, uninstall from *Settings › Apps*, no administrator rights. |
 | 1.8.0 | Renamed RigStart (formerly SimLauncher), new home on GitHub (`rigstart/rigstart`), automatic copy of the SimLauncher configuration, play time and pictures. |
 | 1.7.0 | *General* tab reorganised: stay next to the clock when the window is closed, graceful or immediate closing, configuration export and import. |
 | 1.6.1 | Default profile names follow the interface language; Band cards no longer overlap on narrow windows. |

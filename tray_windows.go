@@ -335,6 +335,25 @@ func migrateAutostart() {
 	}
 }
 
+// uninstallKey : entrée « Applications installées » créée par l'installeur (installer/rigstart.iss).
+const uninstallKey = `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\{6F1C2B7E-4A3D-4E8B-9C21-5D7A0B3E9F14}_is1`
+
+// syncInstalledVersion garde la version affichée dans les Paramètres Windows à jour
+// après une mise à jour intégrée (qui remplace l'exe sans repasser par l'installeur).
+func syncInstalledVersion() {
+	out, err := hidden(exec.Command("reg", "query", uninstallKey, "/v", "DisplayVersion")).Output()
+	if f := strings.Fields(string(out)); err != nil || (len(f) > 0 && f[len(f)-1] == version) {
+		return
+	}
+	loc, err := hidden(exec.Command("reg", "query", uninstallKey, "/v", "InstallLocation")).Output()
+	exe, err2 := os.Executable()
+	if err != nil || err2 != nil || !strings.Contains(strings.ToLower(string(loc)), strings.ToLower(filepath.Dir(exe))) {
+		return
+	}
+	_ = hidden(exec.Command("reg", "add", uninstallKey, "/v", "DisplayVersion", "/t", "REG_SZ", "/d", version, "/f")).Run()
+	_ = hidden(exec.Command("reg", "add", uninstallKey, "/v", "DisplayName", "/t", "REG_SZ", "/d", "RigStart", "/f")).Run()
+}
+
 // steamRoot renvoie le dossier d'installation de Steam (registre, sinon emplacement par défaut).
 func steamRoot() string {
 	if p := os.Getenv("RIGSTART_STEAM"); p != "" {
