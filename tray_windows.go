@@ -196,7 +196,7 @@ func showTrayMenu() {
 			// Un sous-menu par jeu, une entrée par profil.
 			sub, _, _ := procCreatePopupMenu.Call()
 			for _, pr := range c.Profiles {
-				appendMenu(sub, flags, uintptr(cmdGameBase+len(trayGameIDs)), pr.Name)
+				appendMenu(sub, flags, uintptr(cmdGameBase+len(trayGameIDs)), pr.DisplayName())
 				trayGameIDs = append(trayGameIDs, trayItem{g.ID, pr.ID})
 			}
 			appendMenu(menu, mfPopup|flags, sub, T("tray_launch", g.Name))

@@ -246,6 +246,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.6.1 | Default profile names follow the interface language; Band cards no longer overlap on narrow windows. |
 | 1.6.0 | Card styles (*Appearance* tab), play time and launch buttons under the picture, GitHub links in *Updates*, new screenshots. |
 | 1.5.1 | Settings split into tabs with collapsible lines; clear message when an app can't be closed because it runs as administrator. |
 | 1.5.0 | Sequence profiles (cards, tray, `--profile`, Stream Deck, MCP) and play time per game. |

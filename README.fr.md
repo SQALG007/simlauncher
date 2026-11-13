@@ -246,6 +246,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Version | Changements |
 |---|---|
+| 1.6.1 | Les noms des profils par défaut suivent la langue de l'interface ; les cartes Bandeau ne se chevauchent plus sur une fenêtre étroite. |
 | 1.6.0 | Styles de cartes (onglet *Apparence*), temps de jeu et boutons de lancement sous l'image, liens GitHub dans *Mises à jour*, nouvelles captures. |
 | 1.5.1 | Réglages rangés en onglets avec des lignes repliables ; message clair quand un logiciel ne peut pas être fermé parce qu'il tourne en administrateur. |
 | 1.5.0 | Profils de séquence (cartes, icône, `--profile`, Stream Deck, MCP) et temps de jeu par jeu. |

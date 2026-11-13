@@ -256,6 +256,23 @@ func (c *Config) game(id string) (Game, bool) {
 	return Game{}, false
 }
 
+// DisplayName : les profils par défaut (vr, ecran/flat) suivent la langue de l'interface,
+// sauf si l'utilisateur les a renommés.
+func (p Profile) DisplayName() string {
+	switch strings.ToLower(p.ID) {
+	case "ecran", "flat", "screen":
+		if p.Name == "" || p.Name == "Ecran" || p.Name == "Screen" || p.Name == "Flat screen" {
+			return T("prof_flat")
+		}
+		for _, v := range catalog["prof_flat"] {
+			if p.Name == v {
+				return T("prof_flat")
+			}
+		}
+	}
+	return p.Name
+}
+
 func (c *Config) profile(id string) (Profile, bool) {
 	for _, p := range c.Profiles {
 		if strings.EqualFold(p.ID, id) {
@@ -284,7 +301,7 @@ func (c *Config) sequence(g Game, profileID string) ([]string, string, error) {
 			apps = append(apps, a)
 		}
 	}
-	return apps, p.Name, nil
+	return apps, p.DisplayName(), nil
 }
 
 func (c *Config) app(id string) (App, bool) {

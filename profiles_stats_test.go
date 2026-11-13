@@ -107,3 +107,17 @@ func TestSteamPlaytime(t *testing.T) {
 		t.Fatal("ACC n'a pas de données")
 	}
 }
+
+func TestProfileDisplayName(t *testing.T) {
+	setLang("en")
+	defer setLang("fr")
+	if n := (Profile{ID: "ecran", Name: "Écran"}).DisplayName(); n != "Flat" {
+		t.Fatalf("Écran en anglais : %s", n)
+	}
+	if n := (Profile{ID: "ecran", Name: "Mon écran 49 pouces"}).DisplayName(); n != "Mon écran 49 pouces" {
+		t.Fatalf("nom personnalisé : %s", n)
+	}
+	if n := (Profile{ID: "vr", Name: "VR"}).DisplayName(); n != "VR" {
+		t.Fatal(n)
+	}
+}
