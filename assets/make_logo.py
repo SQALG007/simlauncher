@@ -40,7 +40,7 @@ asyncio.run(main())
 from PIL import Image
 big=Image.open("big.png").convert("RGBA"); small=Image.open("small.png").convert("RGBA")
 imgs={s:(big if s>=48 else small).resize((s,s),Image.LANCZOS) for s in (16,20,24,32,40,48,64,128,256)}
-imgs[256].save("simlauncher.ico",sizes=[(s,s) for s in imgs],append_images=[imgs[s] for s in imgs if s!=256])
+imgs[256].save("rigstart.ico",sizes=[(s,s) for s in imgs],append_images=[imgs[s] for s in imgs if s!=256])
 prev=Image.new("RGBA",(256+128+64+48+32+16+60,256),(240,240,240,255)); x=0
 for s in (256,128,64,48,32,16):
     prev.paste(imgs[s],(x,256-s),imgs[s]); x+=s+10

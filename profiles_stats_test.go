@@ -86,7 +86,7 @@ func TestSteamPlaytime(t *testing.T) {
 	setup(t)
 	statsData = nil
 	root := t.TempDir()
-	t.Setenv("SIMLAUNCHER_STEAM", root)
+	t.Setenv("RIGSTART_STEAM", root)
 	writeFile(t, root+"/userdata/123/config/localconfig.vdf", `"UserLocalConfigStore"
 {
 	"Software" { "Valve" { "Steam" { "apps" {

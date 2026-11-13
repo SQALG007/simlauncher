@@ -19,9 +19,12 @@ import (
 
 // Mise à jour depuis les releases GitHub du projet.
 var (
-	releasesAPI    = "https://api.github.com/repos/SQALG007/simlauncher/releases/latest"
-	downloadPrefix = "https://github.com/SQALG007/simlauncher/releases/download/"
-	assetName      = "SimLauncher.exe"
+	releasesAPI    = "https://api.github.com/repos/rigstart/rigstart/releases/latest"
+	downloadPrefix = "https://github.com/rigstart/rigstart/releases/download/"
+	assetName      = "RigStart.exe"
+	// Ancien nom du projet (SimLauncher, jusqu'à 1.7) : accepté pour passer le cap du renommage.
+	legacyPrefix    = "https://github.com/SQALG007/simlauncher/releases/download/"
+	legacyAssetName = "SimLauncher.exe"
 )
 
 type UpdateInfo struct {
@@ -95,7 +98,7 @@ func fetchLatest() (UpdateInfo, error) {
 	info := UpdateInfo{Current: version, Checked: time.Now().Unix()}
 	req, _ := http.NewRequest("GET", releasesAPI, nil)
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "SimLauncher/"+version)
+	req.Header.Set("User-Agent", "RigStart/"+version)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return info, TE("upd_fail", err)
@@ -122,7 +125,11 @@ func fetchLatest() (UpdateInfo, error) {
 	info.Latest = strings.TrimPrefix(rel.TagName, "v")
 	info.NotesURL = rel.HTMLURL
 	for _, a := range rel.Assets {
-		if a.Name == assetName && strings.HasPrefix(a.URL, downloadPrefix) {
+		okURL := strings.HasPrefix(a.URL, downloadPrefix) || strings.HasPrefix(a.URL, legacyPrefix)
+		if !okURL {
+			continue
+		}
+		if a.Name == assetName || (a.Name == legacyAssetName && info.assetURL == "") {
 			info.assetURL, info.assetSize, info.digest = a.URL, a.Size, a.Digest
 		}
 	}
@@ -130,7 +137,7 @@ func fetchLatest() (UpdateInfo, error) {
 	return info, nil
 }
 
-// installUpdate télécharge le nouvel exe, le met à la place de l'actuel et relance SimLauncher.
+// installUpdate télécharge le nouvel exe, le met à la place de l'actuel et relance RigStart.
 func installUpdate() error {
 	updMu.Lock()
 	if updState.Installing {
@@ -191,7 +198,7 @@ func installUpdate() error {
 
 func download(info UpdateInfo, dst string) error {
 	req, _ := http.NewRequest("GET", info.assetURL, nil)
-	req.Header.Set("User-Agent", "SimLauncher/"+version)
+	req.Header.Set("User-Agent", "RigStart/"+version)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return TE("upd_fail", err)
@@ -265,7 +272,7 @@ func updateLoop() {
 				st := getStatus()
 				idle := !st.Busy && st.Watching == 0
 				if c.Settings.AutoUpdate && idle {
-					trayNotify("SimLauncher", T("upd_installing_n", u.Latest))
+					trayNotify("RigStart", T("upd_installing_n", u.Latest))
 					_ = installUpdate()
 				} else if c.Settings.AutoUpdate {
 					time.Sleep(10 * time.Minute) // une session est en cours : on réessaie plus tard
@@ -276,7 +283,7 @@ func updateLoop() {
 					updNotify = true
 					updMu.Unlock()
 					if first {
-						trayNotify("SimLauncher", T("upd_available_n", u.Latest))
+						trayNotify("RigStart", T("upd_available_n", u.Latest))
 					}
 				}
 			}

@@ -1,7 +1,7 @@
 package main
 
 // Temps de jeu : l'instance principale (fenêtre ou icône) surveille les processus des jeux
-// configurés, même lancés hors de SimLauncher, et cumule le temps dans stats.json.
+// configurés, même lancés hors de RigStart, et cumule le temps dans stats.json.
 
 import (
 	"encoding/json"
@@ -172,7 +172,7 @@ func steamPlaytime() map[string]GameStats {
 	return out
 }
 
-// gameStats combine le temps de Steam (historique complet) et celui mesuré par SimLauncher
+// gameStats combine le temps de Steam (historique complet) et celui mesuré par RigStart
 // (jeux hors Steam, session en cours que Steam n'a pas encore enregistrée).
 func gameStats(c Config) map[string]GameStats {
 	own := loadStats()

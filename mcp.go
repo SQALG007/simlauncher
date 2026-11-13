@@ -1,8 +1,8 @@
 package main
 
 // Serveur MCP (Model Context Protocol) sur stdio : permet à un assistant IA
-// (Claude Desktop, etc.) de lister et lancer les jeux de SimLauncher.
-// Démarrage : SimLauncher.exe --mcp
+// (Claude Desktop, etc.) de lister et lancer les jeux de RigStart.
+// Démarrage : RigStart.exe --mcp
 
 import (
 	"bufio"
@@ -54,7 +54,7 @@ func idArg(name, desc string) map[string]any {
 }
 
 var mcpTools = []mcpTool{
-	{"list_games", "List the sim racing games configured in SimLauncher, with their ID, name and whether they are running.", noArgs()},
+	{"list_games", "List the sim racing games configured in RigStart, with their ID, name and whether they are running.", noArgs()},
 	{"launch_game", "Run the launch sequence for a game: start its companion apps (VR runtime, wheel software, SimHub, Crew Chief...) if they are not running, wait, then start the game. Returns the steps performed.", map[string]any{"type": "object", "properties": map[string]any{
 		"game_id": map[string]any{"type": "string", "description": "Game ID from list_games, e.g. \"ams2\""},
 		"profile": map[string]any{"type": "string", "description": "Optional sequence profile ID from list_games, e.g. \"vr\" or \"flat\""},
@@ -82,7 +82,7 @@ func (r remoteBackend) do(method, path string, body any, out any) error {
 		rd = bytes.NewReader(b)
 	}
 	req, _ := http.NewRequest(method, r.base+path, rd)
-	req.Header.Set("X-SimLauncher", "1")
+	req.Header.Set("X-RigStart", "1")
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
 	if err != nil {
@@ -332,8 +332,8 @@ func handleRPC(req rpcReq) *rpcResp {
 		resp.Result = map[string]any{
 			"protocolVersion": pv,
 			"capabilities":    map[string]any{"tools": map[string]any{"listChanged": false}},
-			"serverInfo":      map[string]any{"name": "simlauncher", "version": version},
-			"instructions":    "SimLauncher starts a sim racing session: companion apps (VR, wheel, SimHub, Crew Chief) then the game. Call list_games to get IDs, then launch_game. add_game and add_app add new entries to the configuration.",
+			"serverInfo":      map[string]any{"name": "rigstart", "version": version},
+			"instructions":    "RigStart starts a sim racing session: companion apps (VR, wheel, SimHub, Crew Chief) then the game. Call list_games to get IDs, then launch_game. add_game and add_app add new entries to the configuration.",
 		}
 	case "ping":
 		resp.Result = map[string]any{}

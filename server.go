@@ -67,7 +67,7 @@ func writeErr(w http.ResponseWriter, code int, err error) {
 // (en-tête personnalisé, impossible à envoyer depuis un autre site sans accord CORS).
 func guard(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost || r.Header.Get("X-SimLauncher") != "1" {
+		if r.Method != http.MethodPost || r.Header.Get("X-RigStart") != "1" {
 			writeErr(w, http.StatusForbidden, TE("forbidden"))
 			return
 		}
@@ -283,7 +283,7 @@ func newMux() *http.ServeMux {
 		}
 		writeJSON(w, 200, added)
 	}))
-	// Copie l'image Steam d'un jeu dans le dossier de SimLauncher et renvoie son chemin (le brouillon des réglages l'utilise).
+	// Copie l'image Steam d'un jeu dans le dossier de RigStart et renvoie son chemin (le brouillon des réglages l'utilise).
 	mux.HandleFunc("/api/steam/copycover", guard(func(w http.ResponseWriter, r *http.Request) {
 		var body struct {
 			AppID  string `json:"appId"`
@@ -327,7 +327,7 @@ func newMux() *http.ServeMux {
 			writeErr(w, 400, TE("webhook_empty"))
 			return
 		}
-		if err := fireWebhook(url, event, Game{ID: "test", Name: "SimLauncher test"}); err != nil {
+		if err := fireWebhook(url, event, Game{ID: "test", Name: "RigStart test"}); err != nil {
 			writeErr(w, 502, err)
 			return
 		}

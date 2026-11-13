@@ -31,13 +31,13 @@ func fireWebhook(url, event string, g Game) error {
 	if url == "" {
 		return nil
 	}
-	body, _ := json.Marshal(map[string]any{"event": event, "game_id": g.ID, "game": g.Name, "time": time.Now().Format(time.RFC3339), "source": "SimLauncher"})
+	body, _ := json.Marshal(map[string]any{"event": event, "game_id": g.ID, "game": g.Name, "time": time.Now().Format(time.RFC3339), "source": "RigStart"})
 	req, err := http.NewRequest("POST", url, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "SimLauncher/"+version)
+	req.Header.Set("User-Agent", "RigStart/"+version)
 	resp, err := hookHTTP.Do(req)
 	if err != nil {
 		log.Printf("Webhook %s : %v", event, err)

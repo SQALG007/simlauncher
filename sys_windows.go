@@ -157,7 +157,7 @@ func messageBox(title, text string) {
 
 // pickFile ouvre la boîte de dialogue « Ouvrir » et renvoie le chemin choisi ("" si annulé).
 // Elle tourne dans un PowerShell séparé (OpenFileDialog de .NET) : un souci dans la
-// boîte de dialogue ou une extension de l'Explorateur ne peut pas faire tomber SimLauncher.
+// boîte de dialogue ou une extension de l'Explorateur ne peut pas faire tomber RigStart.
 func pickFile(initial string, image bool) (string, error) {
 	filter := T("pick_exe") + "|*.exe|" + T("pick_all") + "|*.*"
 	title := T("pick_title")

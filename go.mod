@@ -1,3 +1,3 @@
-module github.com/SQALG007/simlauncher
+module github.com/rigstart/rigstart
 
 go 1.23

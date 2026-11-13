@@ -14,7 +14,7 @@ import (
 
 func init() {
 	mcpTools = append(mcpTools,
-		mcpTool{"add_game", "Add a game to SimLauncher. Give a Steam AppID (preferred, found in the store URL store.steampowered.com/app/<id>) or the full path of the game's .exe. By default every companion app is started before it.", map[string]any{
+		mcpTool{"add_game", "Add a game to RigStart. Give a Steam AppID (preferred, found in the store URL store.steampowered.com/app/<id>) or the full path of the game's .exe. By default every companion app is started before it.", map[string]any{
 			"type": "object",
 			"properties": map[string]any{
 				"name":         map[string]any{"type": "string", "description": "Display name, e.g. \"iRacing\""},
@@ -30,7 +30,7 @@ func init() {
 			},
 			"required": []string{"name"}, "additionalProperties": false,
 		}},
-		mcpTool{"add_app", "Add a companion app (VR runtime, wheel software, telemetry, overlay...) that SimLauncher can start before games.", map[string]any{
+		mcpTool{"add_app", "Add a companion app (VR runtime, wheel software, telemetry, overlay...) that RigStart can start before games.", map[string]any{
 			"type": "object",
 			"properties": map[string]any{
 				"name":          map[string]any{"type": "string", "description": "Display name, e.g. \"OpenKneeboard\""},
@@ -50,9 +50,9 @@ func init() {
 func init() {
 	mcpTools = append(mcpTools,
 		mcpTool{"end_session", "End the sim racing session: close the running game and every companion app, then call the end-of-session webhook if one is set.", noArgs()},
-		mcpTool{"scan_steam_games", "List the games installed in Steam on this PC. By default only known sim racing games; set all to true for every installed game. Shows which ones are already in SimLauncher.", map[string]any{
+		mcpTool{"scan_steam_games", "List the games installed in Steam on this PC. By default only known sim racing games; set all to true for every installed game. Shows which ones are already in RigStart.", map[string]any{
 			"type": "object", "properties": map[string]any{"all": map[string]any{"type": "boolean", "description": "Include every installed Steam game, not only racing games"}}, "additionalProperties": false}},
-		mcpTool{"import_steam_games", "Add installed Steam games to SimLauncher with their Steam picture, process name and every companion app. Without app_ids, adds every racing game found that is not configured yet.", map[string]any{
+		mcpTool{"import_steam_games", "Add installed Steam games to RigStart with their Steam picture, process name and every companion app. Without app_ids, adds every racing game found that is not configured yet.", map[string]any{
 			"type": "object", "properties": map[string]any{"app_ids": map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "Steam AppIDs from scan_steam_games"}}, "additionalProperties": false}},
 	)
 }
@@ -105,7 +105,7 @@ func mcpImportSteam(c Config, args map[string]any) (string, error) {
 		}
 	}
 	if len(ids) == 0 {
-		return "Every installed racing game is already in SimLauncher.", nil
+		return "Every installed racing game is already in RigStart.", nil
 	}
 	added, err := importSteam(ids)
 	if err != nil {
@@ -240,7 +240,7 @@ func mcpAddGame(args map[string]any) (string, error) {
 	if g.Process == "" {
 		notes = append(notes, "tip: set process so companion apps can be closed when the game exits")
 	}
-	return addResult("game", g, notes, fmt.Sprintf("Stream Deck command: \"SimLauncher.exe\" --game %s", g.ID)), nil
+	return addResult("game", g, notes, fmt.Sprintf("Stream Deck command: \"RigStart.exe\" --game %s", g.ID)), nil
 }
 
 func mcpAddApp(args map[string]any) (string, error) {

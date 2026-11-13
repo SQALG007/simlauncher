@@ -69,7 +69,7 @@ type Config struct {
 var cfgMu sync.Mutex
 
 func configDir() string {
-	if d := os.Getenv("SIMLAUNCHER_HOME"); d != "" {
+	if d := os.Getenv("RIGSTART_HOME"); d != "" {
 		return d
 	}
 	base := os.Getenv("APPDATA")
@@ -77,7 +77,68 @@ func configDir() string {
 		h, _ := os.UserHomeDir()
 		base = filepath.Join(h, ".config")
 	}
-	return filepath.Join(base, "SimLauncher")
+	return filepath.Join(base, "RigStart")
+}
+
+// legacyDir : dossier de l'ancien nom du projet (SimLauncher, jusqu'à la version 1.7).
+func legacyDir() string {
+	if os.Getenv("RIGSTART_HOME") != "" {
+		return ""
+	}
+	if d := os.Getenv("SIMLAUNCHER_HOME"); d != "" {
+		return d
+	}
+	if base := os.Getenv("APPDATA"); base != "" {
+		return filepath.Join(base, "SimLauncher")
+	}
+	return ""
+}
+
+// migrateLegacy recopie la configuration, les statistiques et les images de
+// %APPDATA%\SimLauncher vers %APPDATA%\RigStart au premier lancement.
+// L'ancien dossier n'est pas modifié. Un autre logiciel nommé SimLauncher utilise
+// le même dossier : on ne reprend le fichier que s'il a bien notre format.
+func migrateLegacy() bool {
+	old := legacyDir()
+	if old == "" || old == configDir() {
+		return false
+	}
+	b, err := os.ReadFile(filepath.Join(old, "config.json"))
+	if err != nil {
+		return false
+	}
+	var c Config
+	if json.Unmarshal(b, &c) != nil || len(c.Games) == 0 || len(c.Apps) == 0 {
+		return false
+	}
+	newDir := configDir()
+	if os.MkdirAll(filepath.Join(newDir, "covers"), 0o755) != nil {
+		return false
+	}
+	if ents, err := os.ReadDir(filepath.Join(old, "covers")); err == nil {
+		for _, e := range ents {
+			if e.IsDir() {
+				continue
+			}
+			if data, err := os.ReadFile(filepath.Join(old, "covers", e.Name())); err == nil {
+				_ = os.WriteFile(filepath.Join(newDir, "covers", e.Name()), data, 0o644)
+			}
+		}
+	}
+	if data, err := os.ReadFile(filepath.Join(old, "stats.json")); err == nil {
+		_ = os.WriteFile(filepath.Join(newDir, "stats.json"), data, 0o644)
+	}
+	oldCovers := strings.ToLower(filepath.Join(old, "covers")) + string(filepath.Separator)
+	for i, g := range c.Games {
+		if strings.HasPrefix(strings.ToLower(g.Image), oldCovers) {
+			c.Games[i].Image = filepath.Join(newDir, "covers", g.Image[len(oldCovers):])
+		}
+	}
+	out, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		return false
+	}
+	return os.WriteFile(configPath(), out, 0o644) == nil
 }
 
 func configPath() string { return filepath.Join(configDir(), "config.json") }
@@ -111,6 +172,9 @@ func loadConfig() (Config, error) {
 	cfgMu.Lock()
 	defer cfgMu.Unlock()
 	b, err := os.ReadFile(configPath())
+	if errors.Is(err, os.ErrNotExist) && migrateLegacy() {
+		b, err = os.ReadFile(configPath())
+	}
 	if errors.Is(err, os.ErrNotExist) {
 		c := defaultConfig()
 		return c, saveConfigLocked(c)

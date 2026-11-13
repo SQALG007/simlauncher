@@ -9,7 +9,7 @@ import (
 
 func TestGameImage(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("SIMLAUNCHER_HOME", dir)
+	t.Setenv("RIGSTART_HOME", dir)
 	img := filepath.Join(dir, "ams2.png")
 	os.WriteFile(img, []byte("\x89PNG\r\n\x1a\nfake"), 0o644)
 	secret := filepath.Join(dir, "secret.txt")

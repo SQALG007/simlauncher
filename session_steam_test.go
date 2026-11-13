@@ -75,7 +75,7 @@ func TestSteamScanAndImport(t *testing.T) {
 	setup(t)
 	root := t.TempDir()
 	lib2 := t.TempDir()
-	t.Setenv("SIMLAUNCHER_STEAM", root)
+	t.Setenv("RIGSTART_STEAM", root)
 	writeFile(t, filepath.Join(root, "steamapps", "libraryfolders.vdf"), `"libraryfolders"
 {
 	"0" { "path" "`+strings.ReplaceAll(root, `\`, `\\`)+`" "apps" { "1066890" "1" } }

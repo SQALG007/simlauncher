@@ -212,7 +212,7 @@ func steamCover(root, appID string) string {
 
 func fileExists(p string) bool { st, err := os.Stat(p); return err == nil && !st.IsDir() }
 
-// copyCover copie l'image Steam dans le dossier de SimLauncher (Steam renomme ses fichiers de cache).
+// copyCover copie l'image Steam dans le dossier de RigStart (Steam renomme ses fichiers de cache).
 func copyCover(appID, gameID string) (string, error) {
 	src := steamCover(steamRoot(), appID)
 	if src == "" {
@@ -295,7 +295,7 @@ func steamSummary(l []SteamGame) string {
 	for _, g := range l {
 		state := "new"
 		if g.Configured {
-			state = "already in SimLauncher"
+			state = "already in RigStart"
 		}
 		fmt.Fprintf(&b, "%s — %s (AppID %s, %s)\n", g.ID, g.Name, g.AppID, state)
 	}

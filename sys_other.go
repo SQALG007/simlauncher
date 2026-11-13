@@ -49,7 +49,7 @@ func (f *fakeSys) Kill(p string) error {
 	return nil
 }
 func (f *fakeSys) FileExists(path string) bool {
-	if os.Getenv("SIMLAUNCHER_FAKE_MISSING") != "" && strings.Contains(path, os.Getenv("SIMLAUNCHER_FAKE_MISSING")) {
+	if os.Getenv("RIGSTART_FAKE_MISSING") != "" && strings.Contains(path, os.Getenv("RIGSTART_FAKE_MISSING")) {
 		return false
 	}
 	return true
@@ -65,8 +65,9 @@ var fakeAutostart bool
 
 func runTray(url string) error      { select {} }
 func trayNotify(title, text string) {}
-func steamRoot() string             { return os.Getenv("SIMLAUNCHER_STEAM") }
+func steamRoot() string             { return os.Getenv("RIGSTART_STEAM") }
 
 func getAutostart() bool         { return fakeAutostart }
+func migrateAutostart()          {}
 func setAutostart(on bool) error { fakeAutostart = on; return nil }
 func quitApp(code int)           { os.Exit(code) }

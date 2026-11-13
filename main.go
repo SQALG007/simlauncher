@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const version = "1.7.0"
+const version = "1.8.0"
 
 func main() {
 	gameID := flag.String("game", "", "lance le jeu indiqué (ex. ams2) sans interface — pour le Stream Deck")
@@ -25,7 +25,7 @@ func main() {
 	setupLog()
 	c, err := loadConfig()
 	if err != nil && !*mcp {
-		messageBox("SimLauncher", T("cli_cfg", err, configPath()))
+		messageBox("RigStart", T("cli_cfg", err, configPath()))
 		os.Exit(1)
 	}
 
@@ -36,7 +36,7 @@ func main() {
 			os.Exit(1)
 		}
 	case *end:
-		// Si SimLauncher tourne déjà, c'est lui qui ferme (et qui envoie le webhook une seule fois).
+		// Si RigStart tourne déjà, c'est lui qui ferme (et qui envoie le webhook une seule fois).
 		r := remoteBackend{base: fmt.Sprintf("http://127.0.0.1:%d", c.Settings.UIPort)}
 		if _, err := r.state(); err == nil {
 			if err := r.do("POST", "/api/end", struct{}{}, nil); err == nil {
@@ -44,7 +44,7 @@ func main() {
 			}
 		}
 		if _, err := endSession(c); err != nil {
-			messageBox("SimLauncher", err.Error())
+			messageBox("RigStart", err.Error())
 			os.Exit(3)
 		}
 	case *list:
@@ -54,12 +54,12 @@ func main() {
 	case *gameID != "":
 		g, ok := c.game(*gameID)
 		if !ok {
-			messageBox("SimLauncher", T("cli_unknown", *gameID))
+			messageBox("RigStart", T("cli_unknown", *gameID))
 			os.Exit(2)
 		}
 		apps, _, err := c.sequence(g, *profile)
 		if err != nil {
-			messageBox("SimLauncher", err.Error())
+			messageBox("RigStart", err.Error())
 			os.Exit(2)
 		}
 		if *startApps {
@@ -73,7 +73,7 @@ func main() {
 			return
 		}
 		if err := launchGameProfile(c, g.ID, *profile); err != nil {
-			messageBox("SimLauncher", err.Error())
+			messageBox("RigStart", err.Error())
 			os.Exit(3)
 		}
 		// Signale les logiciels introuvables (le jeu a quand même été lancé).
@@ -91,9 +91,10 @@ func main() {
 		}
 	default:
 		cleanupOldExe()
-		// « Rester près de l'horloge » : la fenêtre s'ouvre, et fermer la fenêtre n'arrête pas SimLauncher.
+		migrateAutostart()
+		// « Rester près de l'horloge » : la fenêtre s'ouvre, et fermer la fenêtre n'arrête pas RigStart.
 		if err := runUI(c, *tray || c.Settings.KeepInTray, !*tray); err != nil {
-			messageBox("SimLauncher", err.Error())
+			messageBox("RigStart", err.Error())
 			os.Exit(1)
 		}
 	}

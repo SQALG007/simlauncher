@@ -35,9 +35,9 @@ func TestUpdateCheckAndDownload(t *testing.T) {
 		case "/latest":
 			fmt.Fprintf(w, `{"tag_name":"v99.0.0","html_url":"https://x/notes","assets":[
 			  {"name":"ams2.png","browser_download_url":"%[1]s/dl/ams2.png","size":3},
-			  {"name":"SimLauncher.exe","browser_download_url":"%[1]s/dl/SimLauncher.exe","size":%[2]d,"digest":"sha256:%[3]s"}]}`,
+			  {"name":"RigStart.exe","browser_download_url":"%[1]s/dl/RigStart.exe","size":%[2]d,"digest":"sha256:%[3]s"}]}`,
 				srv.URL, len(exe), hex.EncodeToString(sum[:]))
-		case "/dl/SimLauncher.exe":
+		case "/dl/RigStart.exe":
 			w.Write(exe)
 		}
 	}))
@@ -64,7 +64,7 @@ func TestUpdateCheckAndDownload(t *testing.T) {
 		t.Fatal("une empreinte fausse devrait être refusée")
 	}
 	// Un fichier hébergé ailleurs que dans les releases du projet est ignoré.
-	downloadPrefix = "https://github.com/SQALG007/simlauncher/releases/download/"
+	downloadPrefix = "https://github.com/rigstart/rigstart/releases/download/"
 	if u := checkUpdate(); u.Available {
 		t.Fatal("un exe hors des releases du projet ne doit pas être proposé")
 	}
@@ -72,8 +72,8 @@ func TestUpdateCheckAndDownload(t *testing.T) {
 
 func TestRemoveOldExes(t *testing.T) {
 	dir := t.TempDir()
-	exe := filepath.Join(dir, "SimLauncher.exe")
-	for _, n := range []string{"SimLauncher.exe", "SimLauncher.exe.old", "SimLauncher.exe.old-1794517000", "Autre.exe.old"} {
+	exe := filepath.Join(dir, "RigStart.exe")
+	for _, n := range []string{"RigStart.exe", "RigStart.exe.old", "RigStart.exe.old-1794517000", "Autre.exe.old"} {
 		os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644)
 	}
 	if left := removeOldExes(exe); left != 0 {

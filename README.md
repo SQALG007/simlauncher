@@ -1,14 +1,16 @@
-<p align="center"><img src="assets/logo.png" width="128" alt="SimLauncher logo"></p>
+<p align="center"><img src="assets/logo.png" width="128" alt="RigStart logo"></p>
 
-# SimLauncher
+# RigStart
 
 **One click, or one Stream Deck key, to start a whole sim racing session on Windows.**
 
-A VR sim racing session usually means opening four or five programs in the right order before the game: the VR runtime, the wheel base software, SimHub, a spotter such as Crew Chief… SimLauncher starts each one if it isn't already running, waits for it to be ready, then launches the game. When you're done, one more click closes everything.
+A VR sim racing session usually means opening four or five programs in the right order before the game: the VR runtime, the wheel base software, SimHub, a spotter such as Crew Chief… RigStart starts each one if it isn't already running, waits for it to be ready, then launches the game. When you're done, one more click closes everything.
+
+*Formerly SimLauncher: the project was renamed RigStart in version 1.8.0 so it can't be confused with another open-source app of the same name.*
 
 [Français](README.fr.md) · [Download the latest release](../../releases/latest)
 
-![SimLauncher](docs/v1.6-games.png)
+![RigStart](docs/v1.8-games.png)
 
 ## Contents
 
@@ -35,11 +37,11 @@ A VR sim racing session usually means opening four or five programs in the right
 - **Sequence profiles**: for example *VR* (headset and everything else) and *Flat* (no headset). Each card shows one button per profile, and each profile has its own Stream Deck command.
 - **Starting lights**: five lights follow the sequence and turn green when the game is launched.
 - **End session**: one button, Stream Deck key or tray menu entry closes the game and every companion app.
-- **Optional auto-close**: when the game exits, SimLauncher closes the apps you marked (Crew Chief, for example).
+- **Optional auto-close**: when the game exits, RigStart closes the apps you marked (Crew Chief, for example).
 
 **Your library**
 - **Steam detection**: finds the racing games installed in Steam and adds the ones you tick, with their Steam picture, process name and companion apps.
-- **Play time**: hours played and last session on every card. Steam games show the full history recorded by Steam; other games are timed by SimLauncher while it is running.
+- **Play time**: hours played and last session on every card. Steam games show the full history recorded by Steam; other games are timed by RigStart while it is running.
 - **Card styles**: four looks for the Games tab (Classic, Band, Sheet, Horizontal), picked in *Settings › Appearance*.
 - **Game pictures**: use the Steam banner or any .jpg, .png or .webp image as the card background, and hide the name when the picture already shows the logo.
 
@@ -59,18 +61,27 @@ A VR sim racing session usually means opening four or five programs in the right
 
 | | |
 |---|---|
-| ![Find my Steam games](docs/v1.6-steam.png) | ![Settings](docs/v1.6-settings.png) |
+| ![Find my Steam games](docs/v1.8-steam.png) | ![Settings](docs/v1.8-settings.png) |
 | *Settings › Games › Find my Steam games* | *Settings: tabs on the left, one collapsible line per game* |
-| ![Card styles](docs/v1.6-appearance.png) | ![Stream Deck](docs/v1.6-streamdeck.png) |
+| ![Card styles](docs/v1.8-appearance.png) | ![Stream Deck](docs/v1.8-streamdeck.png) |
 | *Settings › Appearance: four card styles* | *Stream Deck tab: one command per game and profile* |
 
 ## Install
 
-1. Download `SimLauncher.exe` from the [latest release](../../releases/latest) and put it in a folder of your choice (the Desktop works; avoid `Program Files`, which blocks self-updates).
+1. Download `RigStart.exe` from the [latest release](../../releases/latest) and put it in a folder of your choice (the Desktop works; avoid `Program Files`, which blocks self-updates).
 2. Double-click it. Windows SmartScreen may warn about an unsigned app: *More info › Run anyway*.
 3. The interface opens in its own window.
 
-From then on, SimLauncher updates itself.
+From then on, RigStart updates itself.
+
+### Coming from SimLauncher (1.7 or earlier)
+
+SimLauncher 1.7 and earlier can't update to RigStart by themselves: download `RigStart.exe` once from the [latest release](../../releases/latest), close SimLauncher (*Quit* in the tray menu) and start RigStart. On its first start, RigStart:
+
+- copies your games, apps, profiles, settings, play time and pictures from `%APPDATA%\SimLauncher` to `%APPDATA%\RigStart`, without changing the old folder;
+- replaces the *Start with Windows* entry if it pointed to the old exe.
+
+Then update your Stream Deck commands and, if you use it, the MCP entry in Claude Desktop so they point to `RigStart.exe`. Another app called SimLauncher writes to the same `%APPDATA%\SimLauncher` folder; RigStart only copies a configuration that has its own format.
 
 ## Quick start
 
@@ -96,14 +107,14 @@ Settings are split into tabs on the left. *Save* applies the changes of every ta
 | **Integrations** | Home Assistant and webhooks: two URLs called at the start and end of a session, each with a *Test* button. See [below](#home-assistant-and-webhooks). |
 | **Updates** | Check for new versions automatically (on by default), install them automatically (off by default), *Check now*, links to the project, release notes and issues on GitHub. |
 
-**Process names** (for example `AMS2AVX.exe`) let SimLauncher know whether something is already running, and close it at the end. The exact name is in Task Manager › Details.
+**Process names** (for example `AMS2AVX.exe`) let RigStart know whether something is already running, and close it at the end. The exact name is in Task Manager › Details.
 
-**Steam detection** reads your Steam library on disk. It knows the main racing titles (AMS2, ACC, AC, AC EVO, AC Rally, LMU, RaceRoom, BeamNG.drive, rFactor 2, iRacing, Automobilista, Project CARS 2, EA WRC, DiRT Rally 2.0, F1 24/25, Forza…); tick *All games* to list everything else. Pictures are copied into SimLauncher's folder, so they keep working when Steam renames its cache. If a game has no picture, open it once in your Steam library.
+**Steam detection** reads your Steam library on disk. It knows the main racing titles (AMS2, ACC, AC, AC EVO, AC Rally, LMU, RaceRoom, BeamNG.drive, rFactor 2, iRacing, Automobilista, Project CARS 2, EA WRC, DiRT Rally 2.0, F1 24/25, Forza…); tick *All games* to list everything else. Pictures are copied into RigStart's folder, so they keep working when Steam renames its cache. If a game has no picture, open it once in your Steam library.
 
 ## Stream Deck
 
 1. Open the **Stream Deck** tab and copy a command, for example:
-   `"C:\Users\you\Desktop\SimLauncher.exe" --game ams2`
+   `"C:\Users\you\Desktop\RigStart.exe" --game ams2`
 2. In the Stream Deck app, drag a **System › Open** action onto a key and paste the command.
 3. Set a key image: the release includes original icons, and `assets/streamdeck` has the sources.
 
@@ -111,10 +122,10 @@ The *End session* key uses `--end`. Launching from the Stream Deck shows no wind
 
 ## Home Assistant and webhooks
 
-SimLauncher sends a `POST` request with this JSON body:
+RigStart sends a `POST` request with this JSON body:
 
 ```json
-{ "event": "session_start", "game_id": "ams2", "game": "Automobilista 2", "time": "2026-11-12T21:30:00+01:00", "source": "SimLauncher" }
+{ "event": "session_start", "game_id": "ams2", "game": "Automobilista 2", "time": "2026-11-12T21:30:00+01:00", "source": "RigStart" }
 ```
 
 `event` is `session_start` when a launch begins, and `session_end` when the game closes or you click *End session* (sent only once per session). Any service that accepts a webhook works: Home Assistant, Node-RED, IFTTT…
@@ -125,7 +136,7 @@ SimLauncher sends a `POST` request with this JSON body:
 - alias: Sim rig on
   triggers:
     - trigger: webhook
-      webhook_id: simlauncher_start
+      webhook_id: rigstart_start
       allowed_methods: [POST]
       local_only: true
   actions:
@@ -137,7 +148,7 @@ SimLauncher sends a `POST` request with this JSON body:
 - alias: Sim rig off
   triggers:
     - trigger: webhook
-      webhook_id: simlauncher_end
+      webhook_id: rigstart_end
       allowed_methods: [POST]
       local_only: true
   actions:
@@ -145,17 +156,17 @@ SimLauncher sends a `POST` request with this JSON body:
       target: { entity_id: light.cockpit }
 ```
 
-Then, in SimLauncher: *Start* = `http://homeassistant.local:8123/api/webhook/simlauncher_start`, *End* = `http://homeassistant.local:8123/api/webhook/simlauncher_end`. Save, then click *Test*.
+Then, in RigStart: *Start* = `http://homeassistant.local:8123/api/webhook/rigstart_start`, *End* = `http://homeassistant.local:8123/api/webhook/rigstart_end`. Save, then click *Test*.
 
 ## AI assistants (MCP)
 
-SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio. In Claude Desktop, add this to `claude_desktop_config.json` and restart it:
+RigStart speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stdio. In Claude Desktop, add this to `claude_desktop_config.json` and restart it:
 
 ```json
 {
   "mcpServers": {
-    "simlauncher": {
-      "command": "C:\\Path\\To\\SimLauncher.exe",
+    "rigstart": {
+      "command": "C:\\Path\\To\\RigStart.exe",
       "args": ["--mcp"]
     }
   }
@@ -173,41 +184,41 @@ SimLauncher speaks the [Model Context Protocol](https://modelcontextprotocol.io)
 
 Examples: *"Launch Le Mans Ultimate"*, *"Is SimHub running?"*, *"Add my new Steam racing games"*, *"Add OpenKneeboard before AMS2 and LMU"*, *"End the session"*.
 
-When SimLauncher is already running in the tray, the MCP server relays commands to it, so the interface stays in sync. Claude Desktop keeps its own `SimLauncher.exe --mcp` processes running while it is open; that is expected.
+When RigStart is already running in the tray, the MCP server relays commands to it, so the interface stays in sync. Claude Desktop keeps its own `RigStart.exe --mcp` processes running while it is open; that is expected.
 
 ## Command line
 
 ```
-SimLauncher.exe                         open the interface
-SimLauncher.exe --game <id>             run the launch sequence (Stream Deck, shortcuts)
-SimLauncher.exe --game <id> --profile <p>   use a sequence profile (vr, flat…)
-SimLauncher.exe --game <id> --apps      only start the companion apps
-SimLauncher.exe --game <id> --nowait    don't watch for the game exit
-SimLauncher.exe --end                   end the session: close the game and every app
-SimLauncher.exe --tray                  tray icon, no window
-SimLauncher.exe --mcp                   MCP server on stdio
-SimLauncher.exe --list                  print game IDs
+RigStart.exe                         open the interface
+RigStart.exe --game <id>             run the launch sequence (Stream Deck, shortcuts)
+RigStart.exe --game <id> --profile <p>   use a sequence profile (vr, flat…)
+RigStart.exe --game <id> --apps      only start the companion apps
+RigStart.exe --game <id> --nowait    don't watch for the game exit
+RigStart.exe --end                   end the session: close the game and every app
+RigStart.exe --tray                  tray icon, no window
+RigStart.exe --mcp                   MCP server on stdio
+RigStart.exe --list                  print game IDs
 ```
 
 ## Updates
 
-SimLauncher checks [GitHub Releases](../../releases) at startup and every 6 hours. When a new version is out, a green banner offers **Update now** and **What's new**. The new exe is downloaded, its size and SHA-256 are checked against the release, then it replaces the old one and SimLauncher restarts. With *Install updates automatically*, this happens on its own, but never while a launch is running or a game is being watched.
+RigStart checks [GitHub Releases](../../releases) at startup and every 6 hours. When a new version is out, a green banner offers **Update now** and **What's new**. The new exe is downloaded, its size and SHA-256 are checked against the release, then it replaces the old one and RigStart restarts. With *Install updates automatically*, this happens on its own, but never while a launch is running or a game is being watched.
 
 After an update, restart Claude Desktop so the MCP server uses the new version.
 
 ## Files and privacy
 
-Everything stays on your PC, in `%APPDATA%\SimLauncher`:
+Everything stays on your PC, in `%APPDATA%\RigStart`:
 
 | File | Content |
 |---|---|
 | `config.json` | Your settings |
 | `covers\` | Pictures copied from Steam |
-| `stats.json` | Play time measured by SimLauncher (Steam's own play time is only read, never changed) |
+| `stats.json` | Play time measured by RigStart (Steam's own play time is only read, never changed) |
 | `launcher.log` | Log of the last sessions |
-| `crash.log` | Error details, if SimLauncher ever crashes |
+| `crash.log` | Error details, if RigStart ever crashes |
 
-SimLauncher only connects to GitHub (update check and download) and to the webhook URLs you enter. The interface listens on `127.0.0.1:47821` only, and every request that changes something must carry an `X-SimLauncher` header, so web pages can't trigger a launch.
+RigStart only connects to GitHub (update check and download) and to the webhook URLs you enter. The interface listens on `127.0.0.1:47821` only, and every request that changes something must carry an `X-RigStart` header, so web pages can't trigger a launch.
 
 ## Troubleshooting
 
@@ -215,8 +226,8 @@ SimLauncher only connects to GitHub (update check and download) and to the webho
 - **Apps don't close when the game exits**: the game's process name is wrong or empty. Check it in Task Manager › Details.
 - **"Find my Steam games" finds nothing**: Steam must be installed for the current Windows user. Games in other libraries are found through Steam's `libraryfolders.vdf`.
 - **An app won't close ("runs as administrator")**: Windows doesn't let a normal program close an elevated one. Turn off *Run as administrator* for that app (Properties › Compatibility), or close it by hand.
-- **Two `SimLauncher.exe` in Task Manager after quitting**: they are the MCP servers started by Claude Desktop (`--mcp`). They close with Claude Desktop.
-- **The update fails with "Access denied"**: SimLauncher is in a protected folder such as `Program Files`. Move the exe to a folder you own.
+- **Two `RigStart.exe` in Task Manager after quitting**: they are the MCP servers started by Claude Desktop (`--mcp`). They close with Claude Desktop.
+- **The update fails with "Access denied"**: RigStart is in a protected folder such as `Program Files`. Move the exe to a folder you own.
 - **Something else**: send `launcher.log` (and `crash.log` if it isn't empty) in an [issue](../../issues).
 
 ## Build from source
@@ -225,7 +236,7 @@ Requires Go 1.23 or later. Builds the Windows exe from any OS:
 
 ```sh
 go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
-./build.sh                                   # → dist/SimLauncher.exe
+./build.sh                                   # → dist/RigStart.exe
 ```
 
 `go test ./...` runs on any OS (Windows calls are replaced by a fake). Node.js is used, when present, to check that every interface language has every string.
@@ -247,6 +258,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.8.0 | Renamed RigStart (formerly SimLauncher), new home on GitHub (`rigstart/rigstart`), automatic copy of the SimLauncher configuration, play time and pictures. |
 | 1.7.0 | *General* tab reorganised: stay next to the clock when the window is closed, graceful or immediate closing, configuration export and import. |
 | 1.6.1 | Default profile names follow the interface language; Band cards no longer overlap on narrow windows. |
 | 1.6.0 | Card styles (*Appearance* tab), play time and launch buttons under the picture, GitHub links in *Updates*, new screenshots. |
@@ -260,4 +272,4 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 ## License
 
-MIT. SimLauncher is not affiliated with Pimax, MOZA Racing, SimHub, Crew Chief, Elgato, Valve, Home Assistant or any game publisher. Game names and Steam pictures belong to their owners; SimLauncher ships no game artwork, and the bundled Stream Deck icons are original.
+MIT. RigStart is not affiliated with Pimax, MOZA Racing, SimHub, Crew Chief, Elgato, Valve, Home Assistant or any game publisher. Game names and Steam pictures belong to their owners; RigStart ships no game artwork, and the bundled Stream Deck icons are original.

@@ -13,7 +13,7 @@ import (
 )
 
 func setup(t *testing.T) *fakeSys {
-	t.Setenv("SIMLAUNCHER_HOME", t.TempDir())
+	t.Setenv("RIGSTART_HOME", t.TempDir())
 	f := &fakeSys{running: map[string]bool{}}
 	sysImpl = f
 	sleep = func(time.Duration) {}
@@ -74,7 +74,7 @@ func TestGameAlreadyRunning(t *testing.T) {
 
 func TestMissingAppStillLaunchesGame(t *testing.T) {
 	f := setup(t)
-	t.Setenv("SIMLAUNCHER_FAKE_MISSING", "SimHub")
+	t.Setenv("RIGSTART_FAKE_MISSING", "SimHub")
 	if err := launchGame(defaultConfig(), "acc"); err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func TestAPIGuardAndSave(t *testing.T) {
 	c.Settings.DelayBeforeGame = 3
 	b, _ := json.Marshal(c)
 	req, _ := http.NewRequest("POST", srv.URL+"/api/config", bytes.NewReader(b))
-	req.Header.Set("X-SimLauncher", "1")
+	req.Header.Set("X-RigStart", "1")
 	r, _ = http.DefaultClient.Do(req)
 	if r.StatusCode != 200 {
 		t.Fatalf("sauvegarde: %d", r.StatusCode)

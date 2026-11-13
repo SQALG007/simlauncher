@@ -144,7 +144,7 @@ func loadTrayIcon() uintptr {
 func addTrayIcon() {
 	trayNid = notifyIconData{hWnd: trayHwnd, uID: 1, uFlags: nifMessage | nifIcon | nifTip, uCallbackMessage: wmTray, hIcon: loadTrayIcon()}
 	trayNid.cbSize = uint32(unsafe.Sizeof(trayNid))
-	setUTF16(trayNid.szTip[:], "SimLauncher")
+	setUTF16(trayNid.szTip[:], "RigStart")
 	procShellNotifyIconW.Call(nimAdd, uintptr(unsafe.Pointer(&trayNid)))
 }
 
@@ -222,7 +222,7 @@ func showTrayMenu() {
 		go func() {
 			if c, err := loadConfig(); err == nil {
 				closed, _ := endSession(c)
-				trayNotify("SimLauncher", T("end_done", len(closed)))
+				trayNotify("RigStart", T("end_done", len(closed)))
 			}
 		}()
 	case cmd >= cmdGameBase && int(cmd-cmdGameBase) < len(trayGameIDs):
@@ -234,13 +234,13 @@ func showTrayMenu() {
 				return
 			}
 			g, _ := c.game(id)
-			trayNotify("SimLauncher", T("tray_starting", g.Name))
+			trayNotify("RigStart", T("tray_starting", g.Name))
 			if err := launchGameProfile(c, id, item.profile); err != nil {
 				trayNotify(T("err_title"), err.Error())
 				return
 			}
 			if st := getStatus(); st.Result == "warn" {
-				trayNotify("SimLauncher", T("tray_warn", g.Name))
+				trayNotify("RigStart", T("tray_warn", g.Name))
 			}
 			maybeWatch(c, id)
 		}()
@@ -270,7 +270,7 @@ func runTray(url string) error {
 	runtime.LockOSThread()
 	trayURL = url
 	hInst, _, _ := procGetModuleHandleW.Call(0)
-	cls, _ := syscall.UTF16PtrFromString("SimLauncherTray")
+	cls, _ := syscall.UTF16PtrFromString("RigStartTray")
 	wc := wndClassEx{lpfnWndProc: syscall.NewCallback(trayWndProc), hInstance: hInst, lpszClassName: cls}
 	wc.cbSize = uint32(unsafe.Sizeof(wc))
 	if r, _, err := procRegisterClassExW.Call(uintptr(unsafe.Pointer(&wc))); r == 0 {
@@ -301,8 +301,8 @@ func runTray(url string) error {
 const runKey = `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
 
 func getAutostart() bool {
-	out, err := hidden(exec.Command("reg", "query", runKey, "/v", "SimLauncher")).Output()
-	return err == nil && strings.Contains(string(out), "SimLauncher")
+	out, err := hidden(exec.Command("reg", "query", runKey, "/v", "RigStart")).Output()
+	return err == nil && strings.Contains(string(out), "RigStart")
 }
 
 func setAutostart(on bool) error {
@@ -310,17 +310,36 @@ func setAutostart(on bool) error {
 		if !getAutostart() {
 			return nil
 		}
-		return hidden(exec.Command("reg", "delete", runKey, "/v", "SimLauncher", "/f")).Run()
+		return hidden(exec.Command("reg", "delete", runKey, "/v", "RigStart", "/f")).Run()
 	}
 	exe, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	return hidden(exec.Command("reg", "add", runKey, "/v", "SimLauncher", "/t", "REG_SZ", "/d", `"`+exe+`" --tray`, "/f")).Run()
+	return hidden(exec.Command("reg", "add", runKey, "/v", "RigStart", "/t", "REG_SZ", "/d", `"`+exe+`" --tray`, "/f")).Run()
+}
+
+// migrateAutostart remplace l'ancienne entrée « SimLauncher » de démarrage avec
+// Windows (versions 1.7 et avant) par « RigStart », si elle lance bien cet exe.
+func migrateAutostart() {
+	out, err := hidden(exec.Command("reg", "query", runKey, "/v", "SimLauncher")).Output()
+	if err != nil {
+		return
+	}
+	exe, err := os.Executable()
+	if err != nil || !strings.Contains(strings.ToLower(string(out)), strings.ToLower(filepath.Dir(exe))) {
+		return
+	}
+	if setAutostart(true) == nil {
+		_ = hidden(exec.Command("reg", "delete", runKey, "/v", "SimLauncher", "/f")).Run()
+	}
 }
 
 // steamRoot renvoie le dossier d'installation de Steam (registre, sinon emplacement par défaut).
 func steamRoot() string {
+	if p := os.Getenv("RIGSTART_STEAM"); p != "" {
+		return p
+	}
 	if p := os.Getenv("SIMLAUNCHER_STEAM"); p != "" {
 		return p
 	}
