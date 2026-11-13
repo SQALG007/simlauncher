@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const version = "1.6.1"
+const version = "1.7.0"
 
 func main() {
 	gameID := flag.String("game", "", "lance le jeu indiqué (ex. ams2) sans interface — pour le Stream Deck")
@@ -91,7 +91,8 @@ func main() {
 		}
 	default:
 		cleanupOldExe()
-		if err := runUI(c, *tray); err != nil {
+		// « Rester près de l'horloge » : la fenêtre s'ouvre, et fermer la fenêtre n'arrête pas SimLauncher.
+		if err := runUI(c, *tray || c.Settings.KeepInTray, !*tray); err != nil {
 			messageBox("SimLauncher", err.Error())
 			os.Exit(1)
 		}

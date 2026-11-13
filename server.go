@@ -384,7 +384,7 @@ func newMux() *http.ServeMux {
 
 // runUI démarre le serveur local. tray=true : icône de notification, pas de fenêtre
 // et pas d'arrêt automatique. Si une instance tourne déjà, on lui ouvre une fenêtre.
-func runUI(c Config, tray bool) error {
+func runUI(c Config, tray, openWindow bool) error {
 	addr := fmt.Sprintf("127.0.0.1:%d", c.Settings.UIPort)
 	url := "http://" + addr + "/"
 	ln, err := net.Listen("tcp", addr)
@@ -393,7 +393,7 @@ func runUI(c Config, tray bool) error {
 		ln, err = net.Listen("tcp", addr)
 	}
 	if err != nil {
-		if !tray {
+		if openWindow {
 			openUI(url) // une instance tourne déjà
 		}
 		return nil
@@ -408,6 +408,9 @@ func runUI(c Config, tray bool) error {
 				log.Print(err)
 			}
 		}()
+		if openWindow && !justUpdated {
+			openUI(url)
+		}
 		return runTray(url)
 	}
 	// Fermeture automatique quand la fenêtre est fermée (plus de ping) et que rien n'est en cours.

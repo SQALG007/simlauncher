@@ -52,6 +52,7 @@ A VR sim racing session usually means opening four or five programs in the right
 - **Tray icon**: starts with Windows as an icon next to the clock. Right-click to launch a game or end the session.
 - **Built-in updates**: a banner when a new version is out, one-click install, or fully automatic if you allow it (never during a session). Every download is checked against the release's SHA-256.
 - **5 languages**: English, Français, Português (Brasil), Español, 简体中文. Follows the Windows language by default.
+- **Backup**: export your whole configuration to a file and import it on another PC.
 - **Single portable .exe**: no installer, nothing else to install.
 
 ## Screenshots
@@ -88,7 +89,7 @@ Settings are split into tabs on the left. *Save* applies the changes of every ta
 | Section | What you set |
 |---|---|
 | **Appearance** | Card style for the Games tab: Classic, Band, Sheet or Horizontal, with a preview of each. |
-| **General** | Pause before the game, auto-close of apps when the game exits, start with Windows, interface port. |
+| **General** | *Behaviour*: start with Windows, stay next to the clock when the window is closed, close apps gracefully (or immediately), close apps when the game exits. *Sequence*: pause before the game, interface port. *Backup*: export and import the whole configuration as a JSON file. |
 | **Games** | *Find my Steam games*, then one line per game (click to expand): name, ID, Steam AppID or executable, arguments, process name, colour, card picture (*Browse* or *Steam picture*), *Hide the name*, apps to start first. |
 | **Apps** | One line per companion app: name, path, arguments, process name, delay after start, *Close after* (closed when the game exits). The order of the list is the start order. |
 | **Profiles** | Name, ID and the apps allowed in each profile. A game only starts the apps it has *and* the profile allows. |
@@ -246,6 +247,7 @@ go install github.com/akavel/rsrc@v0.10.2   # optional, embeds the icon
 
 | Version | Changes |
 |---|---|
+| 1.7.0 | *General* tab reorganised: stay next to the clock when the window is closed, graceful or immediate closing, configuration export and import. |
 | 1.6.1 | Default profile names follow the interface language; Band cards no longer overlap on narrow windows. |
 | 1.6.0 | Card styles (*Appearance* tab), play time and launch buttons under the picture, GitHub links in *Updates*, new screenshots. |
 | 1.5.1 | Settings split into tabs with collapsible lines; clear message when an app can't be closed because it runs as administrator. |

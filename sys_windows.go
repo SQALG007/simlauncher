@@ -73,8 +73,13 @@ func hidden(cmd *exec.Cmd) *exec.Cmd {
 
 // Kill ferme proprement (WM_CLOSE), puis force après 8 s si besoin.
 func (s winSys) Kill(process string) error {
-	_ = hidden(exec.Command("taskkill", "/IM", process)).Run()
-	for i := 0; i < 8; i++ {
+	grace := 8
+	if forceClose.Load() {
+		grace = 0
+	} else {
+		_ = hidden(exec.Command("taskkill", "/IM", process)).Run()
+	}
+	for i := 0; i < grace; i++ {
 		time.Sleep(time.Second)
 		r, err := s.Running()
 		if err == nil && !r[strings.ToLower(process)] {

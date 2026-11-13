@@ -52,6 +52,7 @@ Une session de sim racing en VR, c'est souvent quatre ou cinq logiciels à ouvri
 - **Icône près de l'horloge** : démarrage avec Windows. Clic droit pour lancer un jeu ou terminer la session.
 - **Mises à jour intégrées** : un bandeau quand une version sort, installation en un clic, ou automatique si tu l'autorises (jamais pendant une session). Chaque téléchargement est vérifié avec l'empreinte SHA-256 de la release.
 - **5 langues** : English, Français, Português (Brasil), Español, 简体中文. Suit la langue de Windows par défaut.
+- **Sauvegarde** : exporte toute ta configuration dans un fichier et réimporte-la sur un autre PC.
 - **Un seul .exe portable** : pas d'installation, rien d'autre à installer.
 
 ## Captures d'écran
@@ -88,7 +89,7 @@ Les réglages sont rangés en onglets à gauche. *Enregistrer* applique en une f
 | Section | Ce que tu règles |
 |---|---|
 | **Apparence** | Style des cartes de l'onglet Jeux : Classique, Bandeau, Fiche ou Horizontale, avec un aperçu de chacun. |
-| **Général** | Pause avant le jeu, fermeture automatique des logiciels à la fin du jeu, démarrage avec Windows, port de l'interface. |
+| **Général** | *Comportement* : démarrer avec Windows, rester près de l'horloge quand on ferme la fenêtre, fermer les logiciels en douceur (ou immédiatement), fermer les logiciels à la fin du jeu. *Séquence* : pause avant le jeu, port de l'interface. *Sauvegarde* : exporter et importer toute la configuration dans un fichier JSON. |
 | **Jeux** | *Détecter mes jeux Steam*, puis une ligne par jeu (clic pour la déplier) : nom, identifiant, AppID Steam ou exécutable, arguments, processus, couleur, image de la carte (*Parcourir* ou *Image Steam*), *Masquer le nom*, logiciels à démarrer avant. |
 | **Logiciels** | Une ligne par logiciel compagnon : nom, chemin, arguments, processus, pause après le démarrage, *Fermer après* (fermé à la fin du jeu). L'ordre de la liste est l'ordre de démarrage. |
 | **Profils** | Nom, identifiant et logiciels autorisés dans chaque profil. Un jeu ne démarre que les logiciels qu'il a *et* que le profil autorise. |
@@ -246,6 +247,7 @@ go install github.com/akavel/rsrc@v0.10.2   # facultatif, intègre l'icône
 
 | Version | Changements |
 |---|---|
+| 1.7.0 | Onglet *Général* réorganisé : rester près de l'horloge quand on ferme la fenêtre, fermeture douce ou immédiate, export et import de la configuration. |
 | 1.6.1 | Les noms des profils par défaut suivent la langue de l'interface ; les cartes Bandeau ne se chevauchent plus sur une fenêtre étroite. |
 | 1.6.0 | Styles de cartes (onglet *Apparence*), temps de jeu et boutons de lancement sous l'image, liens GitHub dans *Mises à jour*, nouvelles captures. |
 | 1.5.1 | Réglages rangés en onglets avec des lignes repliables ; message clair quand un logiciel ne peut pas être fermé parce qu'il tourne en administrateur. |

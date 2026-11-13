@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 // App : un logiciel compagnon (PimaxEVO, Pit House, SimHub, Crew Chief...).
@@ -46,6 +47,8 @@ type Settings struct {
 	WebhookStart    string `json:"webhookStart,omitempty"`  // URL appelée (POST) au début d'une session
 	WebhookEnd      string `json:"webhookEnd,omitempty"`    // URL appelée à la fin (jeu fermé ou « Fin de session »)
 	CardStyle       string `json:"cardStyle,omitempty"`     // classic (défaut), band, sheet, row
+	KeepInTray      bool   `json:"keepInTray,omitempty"`    // rester près de l'horloge quand la fenêtre est fermée
+	ForceClose      bool   `json:"forceClose,omitempty"`    // fermer les logiciels tout de suite, sans fermeture douce
 }
 
 // Profile : une variante de séquence (ex. « VR » ou « Écran ») qui limite les logiciels lancés.
@@ -123,8 +126,12 @@ func loadConfig() (Config, error) {
 		c.Settings.UIPort = 47821
 	}
 	setLang(c.Settings.Language)
+	forceClose.Store(c.Settings.ForceClose)
 	return c, nil
 }
+
+// forceClose : copie du réglage, lue par Sys.Kill (qui ne reçoit pas la configuration).
+var forceClose atomic.Bool
 
 func saveConfig(c Config) error {
 	cfgMu.Lock()
